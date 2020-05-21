@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const Game = require('./game');
 
 const port = 3000;
-const sockets = {};
+var sockets = {};
 var game = new Game();
 
 // middleware
@@ -19,11 +19,21 @@ http.listen(port, () => {
 
 io.on('connection', function(socket) {
     socket.on('login', function(input) {
-        console.log(input+" connected!");
-        sockets[socket.id] = socket;
-        game.addPlayer(socket.id, input);
-        //console.log(JSON.stringify(game.decks[socket.id]));
-        socket.emit('init', JSON.stringify(game.decks[socket.id]));
+        // only let 2 players join
+        if (game.players.count < 2) {
+            console.log(input+" connected!");
+            sockets[socket.id] = socket;
+            game.addPlayer(socket.id, input);
+            // send both players deck info once there are two of them
+            if (game.players.count == 1) {
+                for (var id in sockets) {
+                    sockets[id].emit('init', JSON.stringify(game.decks));
+                }
+            }
+        }
+        else {
+            socket.emit('server_full');
+        }
     });
     socket.on('disconnect', function() {
         console.log(game.players[socket.id]+" disconnected");

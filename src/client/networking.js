@@ -1,6 +1,8 @@
 import io from 'socket.io-client';
 
-export var decks = {};
+export var enemy = {};
+export var me = {};
+export var game_started = false;
 
 var socket;
 
@@ -13,7 +15,18 @@ export function Login(name) {
 
 function setupCallBacks() {
     socket.on('init', (msg) => {
-        decks = JSON.parse(msg);
-        console.log(decks);
+        var init = JSON.parse(msg);
+        var players = Object.keys(init);
+        for (var i = 0; i < players.length; i++) {
+            if (players[i] == socket.id) {
+                me = init[players[i]];
+            } else {
+                enemy = init[players[i]];
+            }
+        }
+        game_started = true;
+    });
+    socket.on('server_full', function() {
+        console.log("server full");
     });
 }

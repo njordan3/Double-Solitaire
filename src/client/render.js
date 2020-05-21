@@ -1,10 +1,12 @@
 import {getAsset} from './assets';
+import {me, enemy, game_started} from './networking';
 
 const canvas = document.getElementById('game-canvas');
 const context = canvas.getContext('2d');
 
 var Deck;
 var Card_ratio = {};
+var card_size_coef = 2;
 
 export function startRendering() {
     canvas.style.display = "block";
@@ -19,7 +21,10 @@ function renderGame() {
     // clear canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
     renderBackground();
-    renderCards();
+    if (game_started) {
+        renderCards();
+    }
+    window.requestAnimationFrame(renderGame);
 }
 
 function renderBackground() {
@@ -30,26 +35,23 @@ function renderBackground() {
 }
 
 function renderCards() {
-    for (var i=0; i < 4; i++) {
-        for (var j=0; j < 13; j++) {
-            context.save();
-            context.translate(0, canvas.height/2);
-            // round the corners of the card
-            roundImage(j*Card_ratio.width, i*Card_ratio.height, Card_ratio.width, Card_ratio.height, 5);
-            context.clip();
-            context.drawImage(
-                Deck,
-                j*Card_ratio.width,
-                i*Card_ratio.height,
-                Card_ratio.width,
-                Card_ratio.height,
-                j*Card_ratio.width,
-                i*Card_ratio.height,
-                Card_ratio.width,
-                Card_ratio.height
-            );
-            context.restore();
-        }
+    // render stacks
+    for (var i = 0; i < me.stacks.length; i++) {
+        var last_in_stack = me.stacks[i][me.stacks[i].length-1];
+        var sx = last_in_stack.rank_val * Card_ratio.width;
+        var sy = last_in_stack.suit_val * Card_ratio.height;
+        var sWidth = Card_ratio.width;
+        var sHeight = Card_ratio.height;
+        var dx = i * Card_ratio.width * card_size_coef;
+        var dy = 0;
+        var dWidth = Card_ratio.width * card_size_coef;
+        var dHeight = Card_ratio.height * card_size_coef;
+        context.save();
+        context.translate(0, 0);
+        roundImage(i*Card_ratio.width*card_size_coef, 0, Card_ratio.width*card_size_coef, Card_ratio.height*card_size_coef, 5);
+        context.clip();
+        context.drawImage(Deck, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+        context.restore();
     }
 }
 

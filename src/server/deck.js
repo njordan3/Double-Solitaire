@@ -25,7 +25,7 @@ module.exports = class Deck {
         var count = 0;
         for (var i = 0; i < 4; i++) {
             for (var j = 0; j < 13; j++) {
-                this.hand[count] = new Card(suits[i].suit, ranks[j], j, suits[i].color);
+                this.hand[count] = new Card(suits[i].suit, ranks[j], i, j, suits[i].color);
                 count += 1;
             }
         }
