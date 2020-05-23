@@ -6,9 +6,10 @@ const context = canvas.getContext('2d');
 
 var Deck;
 var Card_ratio = {};
-var card_size_coef = 2;
+var card_size_coef = 2.65;
 
 export function startRendering() {
+    document.getElementById("login").style.display = "none";
     canvas.style.display = "block";
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -20,18 +21,10 @@ export function startRendering() {
 function renderGame() {
     // clear canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
-    renderBackground();
     if (game_started) {
         renderCards();
     }
     window.requestAnimationFrame(renderGame);
-}
-
-function renderBackground() {
-    context.save();
-    context.fillStyle = "black";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.restore();
 }
 
 function renderCards() {

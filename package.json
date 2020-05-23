@@ -9,7 +9,8 @@
     "socket.io": "^2.3.0"
   },
   "scripts": {
-    "start": "parcel build src/client/index.html --public-url ./ & node src/server/server.js"
+    "start": "parcel build src/client/index.html --public-url ./ & node src/server/server.js",
+    "test": "git add src/client/* src/server/* src/client/styles/*.css public/* package.json package-lock.json"
   },
   "devDependencies": {
     "cssnano": "^4.1.10",
