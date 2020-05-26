@@ -4,6 +4,9 @@
 
 import {getAsset} from './assets';
 import {me, enemy, game_started} from './networking';
+import {constants} from './constants';
+
+const {MY_SIZE, ENEMY_SIZE} = constants;
 
 var canvas = document.getElementById('game-canvas');
 var context = canvas.getContext('2d');
@@ -12,60 +15,71 @@ window.addEventListener("resize", resizeCanvas, false);
 
 var Deck;
 var Card_ratio = {};
-
-var my_size_coef = 2.65;
-var my_stack_pos = {};
-for (var i = 0; i < 7; i++) {
-    my_stack_pos[i] = {};
-}
-var my_translation = {};
-var my_space_between_cards;
+var Card_back = {};
 
 var ace_pos = {};
+var my_stack_pos = {};
+var my_hand_pos = {};
+var enemy_stack_pos = {};
 for (var i = 0; i < 8; i++) {
     ace_pos[i] = {};
+    my_stack_pos[i%7] = {};
+    my_hand_pos[i%4] = {};
+    enemy_stack_pos[i%7] = {};
 }
 var ace_translation = {};
-
-var enemy_size_coef = 1;
-var enemy_stack_pos = {};
-for (var i = 0; i < 7; i++) {
-    enemy_stack_pos[i] = {};
-}
+var stack_translation = {};
+var hand_translation = {};
 var enemy_translation = {};
-var enemy_space_between_cards;
 
 function resizeCanvas() {
     // scale canvas and card positions according to the size of the window
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    // my cards
-    my_space_between_cards = canvas.width*0.01;
-    var stacks_length = Card_ratio.width * my_size_coef * 7 + my_space_between_cards * 6;
-    my_translation = {x: (canvas.width - stacks_length)/2, y: (canvas.height - Card_ratio.height*my_size_coef)/2 + Card_ratio.height*my_size_coef + my_space_between_cards};
-    my_stack_pos.dWidth = Card_ratio.width * my_size_coef;
-    my_stack_pos.dHeight = Card_ratio.height * my_size_coef;
-    for (var i = 0; i < 7; i++) {
-        my_stack_pos[i].dx = i * Card_ratio.width * my_size_coef + my_space_between_cards*i;
-        my_stack_pos[i].dy = 0;
-    }
+
+    var card_space = {x: canvas.width*0.01, y: canvas.height*0.01};
+    var my_space_between_cards = {x: card_space.x + Card_ratio.my_width, y: card_space.y + Card_ratio.my_height};
+    var enemy_space_between_cards = card_space.x + Card_ratio.enemy_width;
+
+    var ace_length = Card_ratio.my_width * 8 + card_space.x * 7;
+    var stack_length = Card_ratio.my_width * 7 + card_space.x * 6;
+    var hand_length = Card_ratio.my_width*2.66 + card_space.x;
+    var enemy_length = Card_ratio.enemy_width * 7 + card_space.x * 6;
+
     // ace cards
-    var ace_length = Card_ratio.width * my_size_coef * 8 + my_space_between_cards * 7;
-    ace_translation = {x: (canvas.width - ace_length)/2, y: (canvas.height - Card_ratio.height*my_size_coef)/2}
-    ace_pos.dWidth = my_stack_pos.dWidth;
-    ace_pos.dHeight = my_stack_pos.dHeight;
+    ace_translation = {x: (canvas.width - ace_length)/2, y: (canvas.height - Card_ratio.my_height)/2}
+    ace_pos.dWidth = Card_ratio.my_width;
+    ace_pos.dHeight = Card_ratio.my_height;
     for (var i = 0; i < 8; i++) {
-        ace_pos[i].dx = i * Card_ratio.width * my_size_coef + my_space_between_cards*i;
+        ace_pos[i].dx = my_space_between_cards.x * i;
         ace_pos[i].dy = 0;
     }
-    // enemy cards
-    enemy_space_between_cards = canvas.width*0.01;
-    var enemy_length = Card_ratio.width * enemy_size_coef * 7 + enemy_space_between_cards * 6;
-    enemy_translation = {x: (canvas.width - enemy_length)/2, y: (canvas.height - Card_ratio.height*enemy_size_coef)/2 - Card_ratio.height*enemy_size_coef - enemy_space_between_cards};
-    enemy_stack_pos.dWidth = Card_ratio.width * enemy_size_coef;
-    enemy_stack_pos.dHeight = Card_ratio.height * enemy_size_coef;
+    // my stack cards
+    stack_translation = {x: (canvas.width - stack_length)/2, y: ace_translation.y + my_space_between_cards.y};
+    my_stack_pos.dWidth = ace_pos.dWidth;
+    my_stack_pos.dHeight = ace_pos.dHeight;
     for (var i = 0; i < 7; i++) {
-        enemy_stack_pos[i].dx = i * Card_ratio.width * enemy_size_coef + enemy_space_between_cards*i;
+        my_stack_pos[i].dx = my_space_between_cards.x * i;
+        my_stack_pos[i].dy = 0;
+    }
+    // my hand cards
+    hand_translation = {x: ace_translation.x, y: ace_translation.y - my_space_between_cards.y};
+    my_hand_pos.dWidth = Card_ratio.my_width;
+    my_hand_pos.dHeight = Card_ratio.my_height;
+    for (var i = 0; i < 2; i++) {
+        my_hand_pos[i].dx = my_space_between_cards*i;
+        my_hand_pos[i].dy = 0;
+    }
+    for (var i = 2; i < 4; i++) {
+        my_hand_pos[i].dx = my_hand_pos[i-1].dx + Card_ratio.my_width*0.33;
+        my_hand_pos[i].dy = 0;
+    }
+    // enemy stack cards
+    enemy_translation = {x: (canvas.width - enemy_length)/2, y: ace_translation.y - Card_ratio.my_height/2 - Card_ratio.enemy_height/2 - card_space.y};
+    enemy_stack_pos.dWidth = Card_ratio.enemy_width;
+    enemy_stack_pos.dHeight = Card_ratio.enemy_height;
+    for (var i = 0; i < 7; i++) {
+        enemy_stack_pos[i].dx = enemy_space_between_cards*i;
         enemy_stack_pos[i].dy = 0;
     }
 }
@@ -73,8 +87,13 @@ function resizeCanvas() {
 export function startRendering() {
     document.getElementById("login").style.display = "none";
     canvas.style.display = "block";
-    Deck = getAsset('Deck_Sprite.png');
-    Card_ratio = {width: Deck.width/13, height: Deck.height/4};
+    Deck = getAsset('Deck_Sprite.gif');
+    Card_ratio = {width: Deck.width/13, height: Deck.height/5};
+    Card_ratio.my_width = Card_ratio.width*MY_SIZE;
+    Card_ratio.my_height = Card_ratio.height*MY_SIZE;
+    Card_ratio.enemy_width = Card_ratio.width*ENEMY_SIZE;
+    Card_ratio.enemy_height = Card_ratio.height*ENEMY_SIZE;
+    Card_back = {sx: 0, sy: Card_ratio.height*4};
     resizeCanvas();
     window.requestAnimationFrame(renderGame);
 }
@@ -99,9 +118,9 @@ function renderCards() {
                 var sWidth = Card_ratio.width;
                 var sHeight = Card_ratio.height;
                 context.save();
-                context.translate(my_translation.x, my_translation.y);
-                roundImage(my_stack_pos[i].dx, my_stack_pos[i].dy, my_stack_pos.dWidth, my_stack_pos.dHeight, 5);
-                context.clip();
+                context.translate(stack_translation.x, stack_translation.y);
+                //roundImage(my_stack_pos[i].dx, my_stack_pos[i].dy, my_stack_pos.dWidth, my_stack_pos.dHeight, 5);
+                //context.clip();
                 context.drawImage(
                     Deck, 
                     sx, sy, 
@@ -110,6 +129,21 @@ function renderCards() {
                     my_stack_pos.dWidth, my_stack_pos.dHeight);
                 context.restore();
             }
+        }
+        if (me.hand.length !== 0) {
+            var sWidth = Card_ratio.width;
+            var sHeight = Card_ratio.height;
+            context.save();
+            context.translate(stack_translation.x, stack_translation.y);
+            //roundImage(my_hand_pos[0].dx, my_hand_pos[0].dy, my_stack_pos.dWidth, my_stack_pos.dHeight, 5);
+            //context.clip();
+            context.drawImage(
+                Deck, 
+                Card_back.sx, Card_back.sy, 
+                sWidth, sHeight, 
+                my_hand_pos[0].dx, my_hand_pos[0].dy, 
+                my_hand_pos.dWidth, my_hand_pos.dHeight);
+            context.restore();
         }
     }
     // ace render stacks
@@ -134,8 +168,8 @@ function renderCards() {
                 var sHeight = Card_ratio.height;
                 context.save();
                 context.translate(enemy_translation.x, enemy_translation.y);
-                roundImage(enemy_stack_pos[i].dx, enemy_stack_pos[i].dy, enemy_stack_pos.dWidth, enemy_stack_pos.dHeight, 5);
-                context.clip();
+                //roundImage(enemy_stack_pos[i].dx, enemy_stack_pos[i].dy, enemy_stack_pos.dWidth, enemy_stack_pos.dHeight, 5);
+                //context.clip();
                 context.drawImage(
                     Deck, 
                     sx, sy, 

@@ -23,6 +23,7 @@ function setupCallBacks() {
             } else {
                 enemy = init[players[i]];
             }
+            console.log(me, enemy);
         }
         game_started = true;
     });

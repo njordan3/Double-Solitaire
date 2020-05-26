@@ -1,8 +1,8 @@
 const Card = require('./card');
 
 
-const suits = [{suit: "clubs", color: "black"}, {suit: "diamonds", color: "red"}, {suit: "hearts", color: "red"}, {suit: "spades", color: "black"}];
-const ranks = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"];
+const suits = [{suit: "hearts", color: "red"}, {suit: "diamonds", color: "red"}, {suit: "clubs", color: "black"}, {suit: "spades", color: "black"}];
+const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king", "ace"];
 
 // min and max are both inclusive
 function generateRandomInt(min, max) {
