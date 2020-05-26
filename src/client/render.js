@@ -3,10 +3,10 @@
 // https://www.kirupa.com/html5/resizing_html_canvas_element.htm
 
 import {getAsset} from './assets';
-import {me, enemy, game_started} from './networking';
-import {constants} from './constants';
+import {me, enemy, aces, game_started} from './networking';
+const Constants = require('./../shared/constants');
 
-const {MY_SIZE, ENEMY_SIZE} = constants;
+const {MY_SIZE, ENEMY_SIZE, WIDTH, HEIGHT} = Constants;
 
 var canvas = document.getElementById('game-canvas');
 var context = canvas.getContext('2d');
@@ -112,11 +112,13 @@ function renderCards() {
     if (Object.keys(me).length !== 0) {
         for (var i = 0; i < 7; i++) {
             if (me.stacks[i].length !== 0) {
-                var last_in_stack = me.stacks[i][me.stacks[i].length-1];
-                var sx = last_in_stack.rank_val * Card_ratio.width;
-                var sy = last_in_stack.suit_val * Card_ratio.height;
-                var sWidth = Card_ratio.width;
-                var sHeight = Card_ratio.height;
+                var last_in_stack = me.stacks[i].cards[me.stacks[i].length-1];
+                var sx = last_in_stack.rank_val * WIDTH;
+                var sy = last_in_stack.suit_val * HEIGHT;
+                if (!last_in_stack.face) {
+                    sx = Card_back.sx;
+                    sy = Card_back.sy;
+                }
                 context.save();
                 context.translate(stack_translation.x, stack_translation.y);
                 //roundImage(my_stack_pos[i].dx, my_stack_pos[i].dy, my_stack_pos.dWidth, my_stack_pos.dHeight, 5);
@@ -124,15 +126,13 @@ function renderCards() {
                 context.drawImage(
                     Deck, 
                     sx, sy, 
-                    sWidth, sHeight, 
-                    my_stack_pos[i].dx, my_stack_pos[i].dy, 
-                    my_stack_pos.dWidth, my_stack_pos.dHeight);
+                    WIDTH, HEIGHT, 
+                    me.stacks[i].x, me.stacks[i].y, 
+                    WIDTH, HEIGHT);
                 context.restore();
             }
         }
         if (me.hand.length !== 0) {
-            var sWidth = Card_ratio.width;
-            var sHeight = Card_ratio.height;
             context.save();
             context.translate(stack_translation.x, stack_translation.y);
             //roundImage(my_hand_pos[0].dx, my_hand_pos[0].dy, my_stack_pos.dWidth, my_stack_pos.dHeight, 5);
@@ -140,7 +140,7 @@ function renderCards() {
             context.drawImage(
                 Deck, 
                 Card_back.sx, Card_back.sy, 
-                sWidth, sHeight, 
+                WIDTH, HEIGHT, 
                 my_hand_pos[0].dx, my_hand_pos[0].dy, 
                 my_hand_pos.dWidth, my_hand_pos.dHeight);
             context.restore();

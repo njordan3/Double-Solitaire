@@ -27,7 +27,7 @@ io.on('connection', function(socket) {
             // send both players deck info once there are two of them
             if (game.players.count <= 2) {
                 for (var id in sockets) {
-                    sockets[id].emit('init', JSON.stringify(game.decks));
+                    sockets[id].emit('init', JSON.stringify(game));
                 }
             }
         }

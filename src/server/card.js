@@ -6,8 +6,8 @@ module.exports = class Card {
         this.rank_val = rank_val;
         this.color = color;
         this.face = false;
-        this.x_pos = undefined;
-        this.y_pos = undefined;
+        this.x = undefined;
+        this.y = undefined;
     }
 
     flipCard() {
