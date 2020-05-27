@@ -1,7 +1,7 @@
 const Deck = require('./deck');
 const Stack = require('./stack');
 const Constants = require('./../shared/constants');
-const {WIDTH, HEIGHT} = Constants;
+const {WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST} = Constants;
 
 module.exports = class Game {
     constructor() {
@@ -9,7 +9,7 @@ module.exports = class Game {
         this.players = {count: 0};
         this.aces = [];
         for (var i = 0; i < 8; i++) {
-            this.aces[i] = new Stack(i*WIDTH, HEIGHT);
+            this.aces[i] = new Stack(i*(WIDTH+X_CARD_DIST), 0);
         }
     }
     addPlayer(id, name) {
@@ -29,4 +29,5 @@ module.exports = class Game {
             aces: this.aces
         };
     }
+
 }

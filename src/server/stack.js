@@ -24,7 +24,8 @@ module.exports = class Stack {
         return {
             x: this.x,
             y: this.y,
-            cards: this.cards
+            cards: this.cards,
+            length: this.length
         };
     }
 }

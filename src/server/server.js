@@ -27,7 +27,7 @@ io.on('connection', function(socket) {
             // send both players deck info once there are two of them
             if (game.players.count <= 2) {
                 for (var id in sockets) {
-                    sockets[id].emit('init', JSON.stringify(game));
+                    sockets[id].emit('update', JSON.stringify(game));
                 }
             }
         }
@@ -39,5 +39,31 @@ io.on('connection', function(socket) {
         console.log(game.players[socket.id]+" disconnected");
         delete sockets[socket.id];
         game.removePlayer(socket.id);
+    });
+    socket.on('stack_drag', function(input) {
+        var actions = JSON.parse(input);
+        console.log("stack drag");
+        console.log(actions);
+    });
+    socket.on('stack_flip', function(input) {
+        var actions = JSON.parse(input);
+        console.log("stack flip");
+        console.log(actions);
+    });
+    socket.on('hand_drag', function(input) {
+        var actions = JSON.parse(input);
+        console.log("hand drag");
+        console.log(actions);
+    });
+    socket.on('hand_flip', function() {
+        console.log("hand flip");
+        if (game.decks[socket.id].hand[0].length !== 0) {
+            game.decks[socket.id].dealThree();
+        } else {
+            game.decks[socket.id].returnToHand();
+        }
+        for (var id in sockets) {
+            sockets[id].emit('update', JSON.stringify(game));
+        }
     });
 });
