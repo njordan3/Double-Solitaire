@@ -13,4 +13,16 @@ module.exports = class Card {
     flipCard() {
         this.face = !this.face;
     }
+
+    toJSON() {
+        return {
+            suit: this.suit,
+            rank: this.rank,
+            suit_val: this.suit_val,
+            rank_val: this.rank_val,
+            face: this.face,
+            x: this.x,
+            y: this.y
+        }
+    }
 }

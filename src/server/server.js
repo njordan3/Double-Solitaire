@@ -24,12 +24,7 @@ io.on('connection', function(socket) {
             console.log(input+" connected!");
             sockets[socket.id] = socket;
             game.addPlayer(socket.id, input);
-            // send both players deck info once there are two of them
-            if (game.players.count <= 2) {
-                for (var id in sockets) {
-                    sockets[id].emit('update', JSON.stringify(game));
-                }
-            }
+            sendUpdateToPlayers();
         }
         else {
             socket.emit('server_full');
@@ -39,6 +34,7 @@ io.on('connection', function(socket) {
         console.log(game.players[socket.id]+" disconnected");
         delete sockets[socket.id];
         game.removePlayer(socket.id);
+        sendUpdateToPlayers();
     });
     socket.on('stack_drag', function(input) {
         var actions = JSON.parse(input);
@@ -62,8 +58,33 @@ io.on('connection', function(socket) {
         } else {
             game.decks[socket.id].returnToHand();
         }
-        for (var id in sockets) {
-            sockets[id].emit('update', JSON.stringify(game));
-        }
+        sendUpdateToPlayers();
     });
 });
+
+function sendUpdateToPlayers() {
+    var msg = {};
+    // send only the last card of each ace stack
+    msg.aces = [];
+    for (var i = 0; i < game.aces.length; i++) {
+        msg.aces[i] = {};
+        msg.aces[i].x = game.aces[i].x;
+        msg.aces[i].y = game.aces[i].y;
+        msg.aces[i].length = game.aces[i].length;
+        if (game.aces[i].length > 0) {
+            msg.aces[i].cards = game.aces[i].cards[game.aces[i].length-1];
+        }
+    }
+    for (var socket in sockets) {
+        for (var id in sockets) {
+            if (socket == id) {
+                msg.me = game.decks[id];
+                msg.me.name = game.players[id];
+            } else {
+                msg.enemy = game.decks[id];
+                msg.enemy.name = game.players[id];
+            }
+        }
+        sockets[socket].emit('update', JSON.stringify(msg));
+    }
+}

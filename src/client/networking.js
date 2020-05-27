@@ -8,7 +8,7 @@ export var me = {};
 export var aces = {};
 export var game_started = false;
 
-var socket;
+export var socket;
 
 export function Login(name) {
     socket = io();
@@ -19,19 +19,11 @@ export function Login(name) {
 
 function setupCallBacks() {
     socket.on('update', (msg) => {
-        var init = JSON.parse(msg);
-        var players = Object.keys(init.decks);
-        for (var i = 0; i < players.length; i++) {
-            if (players[i] == socket.id) {
-                me = init.decks[players[i]];
-                me.name = init.players[players[i]];
-            } else {
-                enemy = init.decks[players[i]];
-                enemy.name = init.players[players[i]];
-            }
-        }
-        console.log(me.hand);
-        aces = init.aces;
+        var update = JSON.parse(msg);
+        console.log(update);
+        me = update.me;
+        enemy = update.enemy;
+        aces = update.aces
         setBoxes();
         startEventListeners();
         game_started = true;
@@ -72,5 +64,5 @@ export function sendHandDrag(e) {
 }
 
 export function sendHandFlip() {
-    socket.emit('hand_flip');
+    //socket.emit('hand_flip');
 }

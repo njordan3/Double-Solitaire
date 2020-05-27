@@ -87,56 +87,27 @@ function renderGame() {
 
 function renderCards() {
     // my render stacks
-    if (Object.keys(me).length !== 0) {
+    if (me != undefined) {
         for (var i = 0; i < 7; i++) {
-            if (me.stacks[i].length !== 0) {
-                var last_in_stack = me.stacks[i].cards[me.stacks[i].length-1];
-                var sx = last_in_stack.rank_val * WIDTH;
-                var sy = last_in_stack.suit_val * HEIGHT;
-                if (!last_in_stack.face) {
-                    sx = Card_back.x;
-                    sy = Card_back.y;
-                }
-                context.save();
-                context.translate(translation.x, translation.y);
-                //roundImage(my_stack_pos[i].dx, my_stack_pos[i].dy, my_stack_pos.dWidth, my_stack_pos.dHeight, 5);
-                //context.clip();
-                context.drawImage(
-                    Deck, 
-                    sx, sy, 
-                    WIDTH, HEIGHT, 
-                    me.stacks[i].x, me.stacks[i].y, 
-                    WIDTH, HEIGHT);
-                context.restore();
+            if (me.stacks[i].length > me.stacks[i].cards.length) {
+                drawCard(me.stacks[i].x, me.stacks[i].y, Card_back.x, Card_back.y);
+            }
+            for (var j = 0; j < me.stacks[i].cards.length; j++) {
+                var card = me.stacks[i].cards[j];
+                drawCard(card.x, card.y, card.rank_val * WIDTH, card.suit_val * HEIGHT);
             }
         }
-        if (me.hand[0].length !== 0) {
-            context.save();
-            context.translate(translation.x, translation.y);
-            //roundImage(my_hand_pos[0].dx, my_hand_pos[0].dy, my_stack_pos.dWidth, my_stack_pos.dHeight, 5);
-            //context.clip();
-            context.drawImage(
-                Deck, 
-                Card_back.x, Card_back.y, 
-                WIDTH, HEIGHT, 
-                me.hand[0].x, me.hand[0].y, 
-                WIDTH, HEIGHT);
-            context.restore();
+        if (me.hand[0].length > 0) {
+            drawCard(me.hand[0].x, me.hand[0].y, Card_back.x, Card_back.y);
         }
-        if (me.hand[1].length !== 0) {
-            context.save();
-            context.translate(translation.x, translation.y);
-            //roundImage(my_hand_pos[0].dx, my_hand_pos[0].dy, my_stack_pos.dWidth, my_stack_pos.dHeight, 5);
-            //context.clip();
-            context.drawImage(
-                Deck, 
-                Card_back.x, Card_back.y, 
-                WIDTH, HEIGHT, 
-                me.hand[1].x, me.hand[1].y,
-                WIDTH, HEIGHT);
-            context.restore();
+        if (me.hand[1].length > 0) {
+            for (var i = 0; i < me.hand[1].cards.length; i++) {
+                var card = me.hand[1].cards[i];
+                drawCard(card.x, card.y, card.rank_val * WIDTH, card.suit_val * HEIGHT);
+            }
         }
     }
+    /*
     // ace render stacks
     for (var i = 0; i < 8; i++) {
         context.save();
@@ -153,7 +124,7 @@ function renderCards() {
         var sx = Card_back.x;
         var sy = Card_back.y;
         // if enemy doesnt exist or if the stack is empty, then render the back of the card
-        if (Object.keys(enemy).length !== 0 && enemy.stacks[i].length !== 0) {
+        if (enemy != undefined && enemy.stacks[i].length !== 0) {
             var last_in_stack = enemy.stacks[i].cards[enemy.stacks[i].length-1];
             if (last_in_stack.face) {
                 sx = last_in_stack.rank_val * WIDTH;
@@ -171,7 +142,9 @@ function renderCards() {
             i*ENEMY_SCALE*(WIDTH+X_CARD_DIST), 0, 
             WIDTH*ENEMY_SCALE, HEIGHT*ENEMY_SCALE);
         context.restore();
+    
     }
+    */
 }
 
 function renderBoxes() {
@@ -202,4 +175,16 @@ function roundImage(x, y, width, height, radius) {
     context.lineTo(x, y + radius);
     context.quadraticCurveTo(x, y, x + radius, y);
     context.closePath();
-  }
+}
+
+function drawCard(x, y, sx, sy) {
+    context.save();
+    context.translate(translation.x, translation.y);
+    context.drawImage(
+        Deck, 
+        sx, sy, 
+        WIDTH, HEIGHT, 
+        x, y, 
+        WIDTH, HEIGHT);
+    context.restore();
+}

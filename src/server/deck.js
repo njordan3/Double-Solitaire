@@ -21,7 +21,44 @@ module.exports = class Deck {
         this.shuffleHand();
         this.dealCards();
     }
-
+    toJSON() {
+        // send the hand with only the three top cards in the flip pile
+        var hand = [];
+        for (var i = 0; i < this.hand.length; i++) {
+            hand[i] = {};
+            hand[i].x = this.hand[i].x;
+            hand[i].y = this.hand[i].y;
+            hand[i].length = this.hand[i].length;
+        }
+        if (this.hand[1].length > 0) {
+            hand[1].cards = [];
+            for (var i = this.hand[1].length-3; i < this.hand[1].length; i++) {
+                if (this.hand[1].cards[i] != null) {
+                    hand[1].cards.push(this.hand[1].cards[i]);
+                }
+            }
+        }
+        // send the stacks with only the cards that are face up
+        var stacks = [];
+        for (var i = 0; i < this.stacks.length; i++) {
+            stacks[i] = {};
+            stacks[i].x = this.stacks[i].x;
+            stacks[i].y = this.stacks[i].y;
+            stacks[i].length = this.stacks[i].length
+            stacks[i].cards = [];
+            var temp = 0;
+            for (var j = 0; j < this.stacks[i].length; j++) {
+                if (this.stacks[i].cards[j].face) {
+                    stacks[i].cards[temp] = this.stacks[i].cards[j];
+                    temp++;
+                }
+            }
+        }
+        return {
+            hand: hand,
+            stacks: stacks
+        }
+    }
     resetDeck() {
         // reset the hand to a brand new unshuffled deck
         this.hand.push(new Stack(0, -(HEIGHT+Y_CARD_DIST)));
