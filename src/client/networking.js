@@ -1,14 +1,14 @@
 import io from 'socket.io-client';
 import {setBoxes} from './render';
-import {indexes, start, startEventListeners} from './inputs';
-import {translation} from './render';
+import {startEventListeners} from './inputs';
 
 export var enemy = {};
 export var me = {};
 export var aces = {};
 export var game_started = false;
+export var cancel_events = false;
 
-export var socket;
+var socket;
 
 export function Login(name) {
     socket = io();
@@ -33,36 +33,10 @@ function setupCallBacks() {
     });
 }
 
-export function sendStackDrag(e) {
-    var actions = {
-        startX: start.x,
-        startY: start.y,
-        destX: -translation.x + e.clientX,
-        destY: -translation.y + e.clientY,
-        stack_index: indexes.i,
-        cards_indexes: indexes.j
-    }
-    socket.emit('stack_drag', JSON.stringify(actions));
-}
-
-export function sendStackFlip() {
-    var actions = {
-        stack_index: indexes.i,
-        cards_indexes: indexes.j
-    }
-    socket.emit('stack_flip', JSON.stringify(actions));
-}
-
-export function sendHandDrag(e) {
-    var actions = {
-        startX: start.x,
-        startY: start.y,
-        destX: -translation.x + e.clientX,
-        destY: -translation.y + e.clientY
+export function sendInput(type, x, y) {
+    var msg = {
+        x: x,
+        y: y
     };
-    socket.emit('hand_drag', JSON.stringify(actions));
-}
-
-export function sendHandFlip() {
-    //socket.emit('hand_flip');
+    socket.emit(type, JSON.stringify(msg));
 }

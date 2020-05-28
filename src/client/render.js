@@ -8,7 +8,7 @@ const Constants = require('./../shared/constants');
 
 const {ENEMY_SCALE, WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST} = Constants;
 
-var canvas = document.getElementById('game-canvas');
+export var canvas = document.getElementById('game-canvas');
 var context = canvas.getContext('2d');
 
 window.addEventListener("resize", resizeCanvas, false);

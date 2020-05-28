@@ -9,6 +9,8 @@ const port = 3000;
 var sockets = {};
 var game = new Game();
 
+var skip_events = false;
+
 // middleware
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static('dist'));
@@ -36,29 +38,28 @@ io.on('connection', function(socket) {
         game.removePlayer(socket.id);
         sendUpdateToPlayers();
     });
-    socket.on('stack_drag', function(input) {
-        var actions = JSON.parse(input);
-        console.log("stack drag");
-        console.log(actions);
-    });
-    socket.on('stack_flip', function(input) {
-        var actions = JSON.parse(input);
-        console.log("stack flip");
-        console.log(actions);
-    });
-    socket.on('hand_drag', function(input) {
-        var actions = JSON.parse(input);
-        console.log("hand drag");
-        console.log(actions);
-    });
-    socket.on('hand_flip', function() {
-        console.log("hand flip");
-        if (game.decks[socket.id].hand[0].length !== 0) {
-            game.decks[socket.id].dealThree();
-        } else {
-            game.decks[socket.id].returnToHand();
+    socket.on('mouseup', function(input) {
+        if (!skip_events) {
+            console.log("up");
+            var info = JSON.parse(input);
+            game.placeCard(socket.id, info.x, info.y);
         }
-        sendUpdateToPlayers();
+        skip_events = false;
+    });
+    socket.on('mousedown', function(input) {
+        var info = JSON.parse(input);
+        if (!game.decideAction(socket.id, info.x, info.y)) {
+            skip_events = true;
+        } else {
+            console.log("success");
+        }
+    });
+    socket.on('mousemove', function(input) {
+        if (!skip_events) {
+            console.log('drag');
+            var info = JSON.parse(input);
+            game.moveCard(socket.id, info.x, info.y);
+        }
     });
 });
 
