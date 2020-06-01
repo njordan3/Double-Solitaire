@@ -18,19 +18,25 @@ export function Login(name) {
 }
 
 function setupCallBacks() {
-    socket.on('update', (msg) => {
-        var update = JSON.parse(msg);
-        console.log(update);
-        me = update.me;
-        enemy = update.enemy;
-        aces = update.aces
+    socket.on('init', (msg) => {
+        updateGame(JSON.parse(msg));
         setBoxes();
         startEventListeners();
         game_started = true;
     });
+    socket.on('update', (msg) => {
+        updateGame(JSON.parse(msg));
+    });
     socket.on('server_full', function() {
         console.log("server full");
     });
+}
+
+function updateGame(update) {
+    console.log(update);
+    me = update.me;
+    enemy = update.enemy;
+    aces = update.aces
 }
 
 export function sendInput(type, x, y) {

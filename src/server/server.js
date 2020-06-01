@@ -26,7 +26,7 @@ io.on('connection', function(socket) {
             console.log(input+" connected!");
             sockets[socket.id] = socket;
             game.addPlayer(socket.id, input);
-            sendUpdateToPlayers();
+            sendUpdateToPlayers('init');
         }
         else {
             socket.emit('server_full');
@@ -36,13 +36,14 @@ io.on('connection', function(socket) {
         console.log(game.players[socket.id]+" disconnected");
         delete sockets[socket.id];
         game.removePlayer(socket.id);
-        sendUpdateToPlayers();
+        sendUpdateToPlayers('update');
     });
     socket.on('mouseup', function(input) {
         if (!skip_events) {
             console.log("up");
             var info = JSON.parse(input);
             game.placeCard(socket.id, info.x, info.y);
+            sendUpdateToPlayers('update');
         }
         skip_events = false;
     });
@@ -59,11 +60,12 @@ io.on('connection', function(socket) {
             console.log('drag');
             var info = JSON.parse(input);
             game.moveCard(socket.id, info.x, info.y);
+            sendUpdateToPlayers('update');
         }
     });
 });
 
-function sendUpdateToPlayers() {
+function sendUpdateToPlayers(type) {
     var msg = {};
     // send only the last card of each ace stack
     msg.aces = [];
@@ -86,6 +88,6 @@ function sendUpdateToPlayers() {
                 msg.enemy.name = game.players[id];
             }
         }
-        sockets[socket].emit('update', JSON.stringify(msg));
+        sockets[socket].emit(type, JSON.stringify(msg));
     }
 }

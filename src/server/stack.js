@@ -6,12 +6,9 @@ module.exports = class Stack {
         this.x = x;
         this.y = y;
         this.cards = [];
-        this.length = 0;
     }
-
     addCard(card) {
         this.cards.push(card);
-        this.length++;
     }
     getFaceAmount() {
         var count = 0;
@@ -21,6 +18,12 @@ module.exports = class Stack {
             }
         }
         return count;
+    }
+    top() {
+        return this.cards.length-1;
+    }
+    length() {
+        return this.cards.length;
     }
     toJSON() {
         return {

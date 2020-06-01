@@ -28,11 +28,11 @@ module.exports = class Deck {
             hand[i] = {};
             hand[i].x = this.hand[i].x;
             hand[i].y = this.hand[i].y;
-            hand[i].length = this.hand[i].length;
+            hand[i].length = this.hand[i].length();
         }
-        if (this.hand[1].length > 0) {
+        if (this.hand[1].length() > 0) {
             hand[1].cards = [];
-            for (var i = this.hand[1].length-3; i < this.hand[1].length; i++) {
+            for (var i = this.hand[1].length()-3; i < this.hand[1].length(); i++) {
                 if (this.hand[1].cards[i] != null) {
                     hand[1].cards.push(this.hand[1].cards[i]);
                 }
@@ -44,10 +44,10 @@ module.exports = class Deck {
             stacks[i] = {};
             stacks[i].x = this.stacks[i].x;
             stacks[i].y = this.stacks[i].y;
-            stacks[i].length = this.stacks[i].length
+            stacks[i].length = this.stacks[i].length();
             stacks[i].cards = [];
             var temp = 0;
-            for (var j = 0; j < this.stacks[i].length; j++) {
+            for (var j = 0; j < this.stacks[i].length(); j++) {
                 if (this.stacks[i].cards[j].face) {
                     stacks[i].cards[temp] = this.stacks[i].cards[j];
                     temp++;
@@ -77,10 +77,9 @@ module.exports = class Deck {
     // gets the last element in the hand and remove it from the hand
     topCardInHand(index) {
         // return if empty
-        if (this.hand[index].cards === undefined || this.hand[index].cards.length == 0) {
+        if (this.hand[index].cards === undefined || this.hand[index].length() == 0) {
             return void 0;
         }
-        this.hand[index].length--;
         return this.hand[index].cards.pop();
     }
 
@@ -88,7 +87,7 @@ module.exports = class Deck {
     // a random card in the hand will swap with the 
     // last card that has not yet been chosen
     shuffleHand() {
-        for (var i = this.hand[0].cards.length-1; i > 0; i--) {
+        for (var i = this.hand[0].top(); i > 0; i--) {
             var random = generateRandomInt(0, i);
             var temp = this.hand[0].cards[random];
             this.hand[0].cards[random] = this.hand[0].cards[i];
@@ -108,14 +107,14 @@ module.exports = class Deck {
         }
         // flip the top card of each stack
         for (var i = 0; i < 7; i++) {
-            this.stacks[i].cards[this.stacks[i].length-1].flipCard();
+            this.stacks[i].cards[this.stacks[i].top()].flipCard();
         }
     }
     dealThree() {
         for (var i = 0; i < 3; i++) {
             if (this.hand[0].length !== 0) {
                 this.hand[1].addCard(this.topCardInHand(0));
-                this.hand[1].cards[this.hand[1].length-1].flipCard();
+                this.hand[1].cards[this.hand[1].top()].flipCard();
             }
         }
     }

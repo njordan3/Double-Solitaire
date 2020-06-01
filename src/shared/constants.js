@@ -5,5 +5,5 @@ module.exports = Object.freeze({
     X_CARD_DIST: 5,
     Y_CARD_DIST: 20,
 
-    ENEMY_SCALE: 0.75,
+    ENEMY_SCALE: 0.75
 });
