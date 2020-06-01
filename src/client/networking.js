@@ -18,19 +18,35 @@ export function Login(name) {
 }
 
 function setupCallBacks() {
-    socket.on('update', (msg) => {
-        var update = JSON.parse(msg);
-        console.log(update);
-        me = update.me;
-        enemy = update.enemy;
-        aces = update.aces
+    socket.on('init', (msg) => {
+        readUpdate(msg);
         setBoxes();
         startEventListeners();
         game_started = true;
+        
+    });
+    socket.on('update', (msg) => {
+        readUpdate(msg);
     });
     socket.on('server_full', function() {
         console.log("server full");
     });
+}
+
+function readUpdate(msg) {
+    var update = JSON.parse(msg);
+    console.log(update.decks[socket.id].stacks[0].cards);
+    var players = Object.keys(update.decks);
+    for (var id in players) {
+        if (players[id] == socket.id) {
+            me = update.decks[players[id]];
+            me.name = update.players[id];
+        } else {
+            enemy = update.decks[players[id]];
+            enemy.name = update.players[id];
+        }
+    }
+    aces = update.aces;
 }
 
 export function sendInput(type, x, y) {

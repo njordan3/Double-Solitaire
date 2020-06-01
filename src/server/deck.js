@@ -31,12 +31,7 @@ module.exports = class Deck {
             hand[i].length = this.hand[i].length;
         }
         if (this.hand[1].length > 0) {
-            hand[1].cards = [];
-            for (var i = this.hand[1].length-3; i < this.hand[1].length; i++) {
-                if (this.hand[1].cards[i] != null) {
-                    hand[1].cards.push(this.hand[1].cards[i]);
-                }
-            }
+            hand[1].cards = this.hand[1].cards;
         }
         // send the stacks with only the cards that are face up
         var stacks = [];
@@ -115,13 +110,18 @@ module.exports = class Deck {
         for (var i = 0; i < 3; i++) {
             if (this.hand[0].length !== 0) {
                 this.hand[1].addCard(this.topCardInHand(0));
+                this.hand[1].cards[this.hand[1].length-1].x = this.hand[1].x + i*0.33*WIDTH;
+                this.hand[1].cards[this.hand[1].length-1].y = this.hand[1].y;
                 this.hand[1].cards[this.hand[1].length-1].flipCard();
             }
         }
     }
     returnToHand() {
-        for (var i = 0; i < this.hand[1].length; i++) {
-            this.hand[0].addCard(this.hand[1].cards[i]);
+        var length = this.hand[1].length;
+        for (var i = 0; i < length; i++) {
+            this.hand[0].addCard(this.topCardInHand(1));
+            this.hand[0].cards[i].x = this.hand[0].x;
+            this.hand[0].cards[i].y = this.hand[0].y;
             this.hand[0].cards[i].flipCard();
         }
         this.hand[1].cards = [];

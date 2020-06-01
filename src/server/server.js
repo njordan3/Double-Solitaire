@@ -26,7 +26,9 @@ io.on('connection', function(socket) {
             console.log(input+" connected!");
             sockets[socket.id] = socket;
             game.addPlayer(socket.id, input);
-            sendUpdateToPlayers();
+            for (var id in sockets) {
+                sockets[id].emit('init', JSON.stringify(game));
+            }
         }
         else {
             socket.emit('server_full');
@@ -43,6 +45,7 @@ io.on('connection', function(socket) {
             console.log("up");
             var info = JSON.parse(input);
             game.placeCard(socket.id, info.x, info.y);
+            sendUpdateToPlayers();
         }
         skip_events = false;
     });
@@ -50,42 +53,21 @@ io.on('connection', function(socket) {
         var info = JSON.parse(input);
         if (!game.decideAction(socket.id, info.x, info.y)) {
             skip_events = true;
-        } else {
-            console.log("success");
+            sendUpdateToPlayers();
         }
     });
     socket.on('mousemove', function(input) {
         if (!skip_events) {
-            console.log('drag');
             var info = JSON.parse(input);
+            console.log('drag');
             game.moveCard(socket.id, info.x, info.y);
+            sendUpdateToPlayers();
         }
     });
 });
 
 function sendUpdateToPlayers() {
-    var msg = {};
-    // send only the last card of each ace stack
-    msg.aces = [];
-    for (var i = 0; i < game.aces.length; i++) {
-        msg.aces[i] = {};
-        msg.aces[i].x = game.aces[i].x;
-        msg.aces[i].y = game.aces[i].y;
-        msg.aces[i].length = game.aces[i].length;
-        if (game.aces[i].length > 0) {
-            msg.aces[i].cards = game.aces[i].cards[game.aces[i].length-1];
-        }
-    }
-    for (var socket in sockets) {
-        for (var id in sockets) {
-            if (socket == id) {
-                msg.me = game.decks[id];
-                msg.me.name = game.players[id];
-            } else {
-                msg.enemy = game.decks[id];
-                msg.enemy.name = game.players[id];
-            }
-        }
-        sockets[socket].emit('update', JSON.stringify(msg));
+    for (var id in sockets) {
+        sockets[id].emit('update', JSON.stringify(game));
     }
 }
