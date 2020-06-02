@@ -5,28 +5,21 @@ const {WIDTH, HEIGHT} = Constants;
 
 export function startEventListeners() {
     var dragging = false;
-    canvas.onmousedown = canvas.onmousemove = canvas.onmouseup = function(e) {
-        switch(e.type) {
-            case "mouseup":
-                console.log('up');
-                sendInput('mouseup', -translation.x + e.pageX, -translation.y + e.pageY)
-                dragging = false;
-                break;
-            case "mousedown":
-                console.log("down");
-                sendInput('mousedown', -translation.x + e.pageX, -translation.y + e.pageY);
-                dragging = true;
-                break;
-            case "mousemove":
-                if (dragging) {
-                    console.log("drag");
-                    sendInput('mousemove', -translation.x + e.pageX, -translation.y + e.pageY);
-                }
-                break;
-            default:
-                console.log("default");
-                break;
+    document.addEventListener("mousemove", function(e) {
+        if (dragging) {
+            console.log("drag");
+            sendInput('mousemove', -translation.x + e.clientX, -translation.y + e.clientY);
         }
-    }
+    });
+    document.addEventListener("mousedown", function(e) {
+        console.log("down");
+        sendInput('mousedown', -translation.x + e.clientX, -translation.y + e.clientY);
+        dragging = true;
+    });
+    document.addEventListener("mouseup", function(e) {
+        console.log('up');
+        sendInput('mouseup', -translation.x + e.clientX, -translation.y + e.clientY)
+        dragging = false;
+    });
 }
 // https://stackoverflow.com/questions/24926028/drag-and-drop-multiple-objects-in-html5-canvas

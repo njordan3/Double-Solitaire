@@ -150,10 +150,11 @@ function renderCards() {
 function renderBoxes() {
     context.save();
     context.translate(translation.x, translation.y);
-    context.globalAlpha = 0.5;
+    //context.globalAlpha = 0.5;
     context.strokeStyle = "gold";
-    context.lineJoin = "round";
-    context.lineWidth = 5;
+    //context.lineJoin = "round";
+    // this line destroys performance for some reason
+    //context.lineWidth = 5;
     context.rect(boxes.aces.x, boxes.aces.y, boxes.aces.width, boxes.aces.height);
     context.rect(boxes.hand.x, boxes.hand.y, boxes.hand.width, boxes.hand.height);
     context.rect(boxes.stacks.x, boxes.stacks.y, boxes.stacks.width, boxes.stacks.height);

@@ -26,9 +26,7 @@ io.on('connection', function(socket) {
             console.log(input+" connected!");
             sockets[socket.id] = socket;
             game.addPlayer(socket.id, input);
-            for (var id in sockets) {
-                sockets[id].emit('init', JSON.stringify(game));
-            }
+            sendUpdateToPlayers('init');
         }
         else {
             socket.emit('server_full');
@@ -38,22 +36,23 @@ io.on('connection', function(socket) {
         console.log(game.players[socket.id]+" disconnected");
         delete sockets[socket.id];
         game.removePlayer(socket.id);
-        sendUpdateToPlayers();
+        sendUpdateToPlayers('update');
     });
     socket.on('mouseup', function(input) {
         if (!skip_events) {
             console.log("up");
             var info = JSON.parse(input);
             game.placeCard(socket.id, info.x, info.y);
-            sendUpdateToPlayers();
+            sendUpdateToPlayers('update');
         }
         skip_events = false;
     });
     socket.on('mousedown', function(input) {
         var info = JSON.parse(input);
+        console.log("down");
         if (!game.decideAction(socket.id, info.x, info.y)) {
             skip_events = true;
-            sendUpdateToPlayers();
+            sendUpdateToPlayers('update');
         }
     });
     socket.on('mousemove', function(input) {
@@ -61,13 +60,13 @@ io.on('connection', function(socket) {
             var info = JSON.parse(input);
             console.log('drag');
             game.moveCard(socket.id, info.x, info.y);
-            sendUpdateToPlayers();
+            sendUpdateToPlayers('update');
         }
     });
 });
 
-function sendUpdateToPlayers() {
+function sendUpdateToPlayers(type) {
     for (var id in sockets) {
-        sockets[id].emit('update', JSON.stringify(game));
+        sockets[id].emit(type, JSON.stringify(game));
     }
 }
