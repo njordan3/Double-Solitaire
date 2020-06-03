@@ -35,7 +35,7 @@ function setupCallBacks() {
 
 function readUpdate(msg) {
     var update = JSON.parse(msg);
-    console.log(update.decks[socket.id].stacks[0].cards);
+    console.log(update);
     var players = Object.keys(update.decks);
     for (var id in players) {
         if (players[id] == socket.id) {
