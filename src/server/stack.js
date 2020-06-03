@@ -5,32 +5,29 @@ module.exports = class Stack {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.cards = [];
+        this.cards = {up: [], down: []};
     }
-    addCard(card) {
-        this.cards.push(card);
+    addCard(index, card) {
+        this.cards[index].push(card);
     }
-    getFaceAmount() {
-        var count = 0;
-        for (var i = 0; i < this.length(); i++) {
-            if (this.cards[i].face) {
-                count++;
-            }
+    alignCards() {
+        for (let i = 0; i < this.length('up'); i++) {
+            this.cards.up[i].x = this.x;
+            this.cards.up[i].y = this.y + i*0.33*HEIGHT
         }
-        return count;
     }
-    top() {
-        return this.cards.length-1;
+    top(index) {
+        return this.length(index)-1;
     }
-    length() {
-        return this.cards.length;
+    length(index) {
+        return this.cards[index].length;
     }
     toJSON() {
         return {
             x: this.x,
             y: this.y,
             cards: this.cards,
-            length: this.length
+            length: this.length('up')+this.length('down')
         };
     }
 }
