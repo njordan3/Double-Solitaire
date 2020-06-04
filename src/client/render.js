@@ -107,8 +107,8 @@ function renderCards() {
             }
         }
     }
-    /*
     // ace render stacks
+    /*
     for (var i = 0; i < 8; i++) {
         context.save();
         context.translate(translation.x, translation.y);

@@ -40,7 +40,7 @@ io.on('connection', function(socket) {
     });
     socket.on('mouseup', function(input) {
         if (!skip_events) {
-            console.log("up");
+            //console.log("up");
             var info = JSON.parse(input);
             game.placeCard(socket.id, info.x, info.y);
             sendUpdateToPlayers('update');
@@ -49,7 +49,7 @@ io.on('connection', function(socket) {
     });
     socket.on('mousedown', function(input) {
         var info = JSON.parse(input);
-        console.log("down");
+        //console.log("down");
         if (!game.decideAction(socket.id, info.x, info.y)) {
             skip_events = true;
             sendUpdateToPlayers('update');
@@ -58,7 +58,7 @@ io.on('connection', function(socket) {
     socket.on('mousemove', function(input) {
         if (!skip_events) {
             var info = JSON.parse(input);
-            console.log('drag');
+            //console.log('drag');
             game.moveCard(socket.id, info.x, info.y);
             sendUpdateToPlayers('update');
         }

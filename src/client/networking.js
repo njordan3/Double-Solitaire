@@ -47,6 +47,7 @@ function readUpdate(msg) {
         }
     }
     aces = update.aces;
+    console.log(aces);
 }
 
 export function sendInput(type, x, y) {

@@ -39,9 +39,10 @@ module.exports = class Game {
         let deck = this.decks[id];
         let hand = deck.hand;
         let stacks = deck.stacks;
+        //console.log(stacks);
         // check mouse/hand collision
         if (this.checkCardCollision(hand[0], x, y)) {
-            if (hand.length == 0) {
+            if (hand[0].length('down') == 0) {
                 this.decks[id].returnToHand();
                 return false;
             } else {
@@ -50,85 +51,120 @@ module.exports = class Game {
             }
         } else if (this.checkStackRowCollision(id, x, y)) {
             for (let i = 0; i < 7; i++) {
-                let init = stacks[i].length() - stacks[i].getFaceAmount();
-                // if face amount is 0, check if player wants to flip the card
-                console.log(stacks[i].length(), stacks[i].getFaceAmount());
-                if (stacks[i].length() == 0) {
-                    continue;
-                } else if (init >= stacks[i].length()) {
-                    if (this.checkCardCollision(stacks[i].cards[stacks[i].top()], x, y)) {
-                        this.decks[id].stacks[i].cards[stacks[i].top()].flipCard();
+                // if there are no up cards, flip the top down card
+                if (stacks[i].length('up') == 0) {
+                    if (stacks[i].length('down') != 0) {
+                        if (this.checkCardCollision(stacks[i], x, y)) {
+                            this.decks[id].stacks[i].cards.down[stacks[i].top('down')].flipCard();
+                        }
                     }
                 } else {
-                    for (let j = init; j < stacks[i].length(); j++) {
-                        let card = stacks[i].cards[j];
+                    for (let j = 0; j < stacks[i].length('up'); j++) {
+                        let card = stacks[i].cards.up[j];
                         if (this.checkCardCollision(card, x, y)) {
                             let temp_j = [];
-                            while (j < stacks[i].length()) {
+                            while (j < stacks[i].length('up')) {
                                 temp_j.push(j);
                                 j++;
                             }
-                            this.setMovingCards(id, 'stacks', i, temp_j, x-card.x, y-card.y, card.x, card.y);
+                            this.setMovingCards(id, 'stacks', i, temp_j, x-card.x, y-card.y);
                             return true;
                         }
                     }
                 }
             }
-        } else if (hand[1].length() != 0 && this.checkCardCollision(hand[1].cards[hand[1].top()], x, y)) {
-            let card = hand[1].cards[hand[1].top()];
-            this.setMovingCards(id, 'hand', 1, [hand[1].top()], x-card.x, y-card.y, card.x, card.y);
+        } else if (hand[1].length('up') != 0 && this.checkCardCollision(hand[1].cards.up[hand[1].top('up')], x, y)) {
+            let card = hand[1].cards.up[hand[1].top('up')];
+            this.setMovingCards(id, 'hand', 1, [hand[1].top('up')], x-card.x, y-card.y);
             return true;
         }
         return false;
     }
-    setMovingCards(id, type, i, j, x, y, initX, initY) {
+    setMovingCards(id, type, i, j, x, y) {
         this.moving_cards[id].type = type;
         this.moving_cards[id].stack = i;
         this.moving_cards[id].cards = j;
         this.moving_cards[id].x = x;
         this.moving_cards[id].y = y;
-        this.moving_cards[id].initX = initX;
-        this.moving_cards[id].initY = initY;
+    }
+    returnMovingCards(id) {
+        let moving = this.moving_cards[id];
+        this.decks[id][moving.type][moving.stack].alignCards(moving.type);
     }
     moveCard(id, x, y) {
         let temp = this.moving_cards[id];
         for (var i = 0; i < temp.cards.length; i++) {
-            this.decks[id][temp.type][temp.stack].cards[temp.cards[i]].x = x - temp.x;
-            this.decks[id][temp.type][temp.stack].cards[temp.cards[i]].y = y - temp.y;
+            this.decks[id][temp.type][temp.stack].cards.up[temp.cards[i]].x = x - temp.x;
+            this.decks[id][temp.type][temp.stack].cards.up[temp.cards[i]].y = y - temp.y;
         }
     }
-    placeCard(id, x, y) {
-        //let stack = this.decks[id][this.moving_cards.type][this.moving_cards.stack];
+    removeCard(id, index = 0) {
         let moving = this.moving_cards[id];
+        //let top = this.decks[id][moving.type][moving.stack].top();
+        let temp = this.decks[id][moving.type][moving.stack].cards.up[index];
+        for (let i = index; i < moving.cards.length; i++) {
+            if (i+1 != moving.cards.length) {
+                this.decks[id][moving.type][moving.stack].cards.up[i] = this.decks[id][moving.type][moving.stack].cards.up[i+1];
+            } else {
+                this.decks[id][moving.type][moving.stack].cards.up[i] = temp;
+            }
+        }
+        return this.decks[id][moving.type][moving.stack].cards.up.pop();
+    }
+    placeCard(id, x, y) {
+        let moving = this.moving_cards[id];
+        let top_cards = this.getTopCards(id);
         if (this.checkStackRowCollision(id, x, y)) {
             for (let i = 0; i < 7; i++) {
-                if (i != moving.stack) {
-                    let card = this.decks[id].stacks[i].cards[this.decks[id].stacks[i].top()];
-                    if (this.checkCardCollision(card, x, y)) {
+                if (top_cards.stacks[i] != undefined && i != moving.stack) {
+                    if (this.checkCardCollision(top_cards.stacks[i], x, y)) {
                         for (let j = 0; j < moving.cards.length; j++) {
-                            this.decks[id].stacks[i].addCard(this.decks[id][moving.type][moving.stack].cards[moving.cards[j]]);
-                            this.decks[id].stacks[i].cards[this.decks[id].stacks[i].top()].x = this.decks[id].stacks[i].cards[this.decks[id].stacks[i].top()-1].x;
-                            this.decks[id].stacks[i].cards[this.decks[id].stacks[i].top()].y = this.decks[id].stacks[i].cards[this.decks[id].stacks[i].top()-1].y + 0.33*HEIGHT;
+                            let temp = this.removeCard(id);
+                            console.log(temp);
+                            this.decks[id].stacks[i].addCard('up', temp);
                         }
-                        for (let j = 0; j < moving.cards.length; j++) {
-                            this.decks[id][moving.type][moving.stack].cards.pop();
-                        }
-                        //console.log(this.decks[id].stacks[i].cards[this.decks[id].stacks[i].top()]);
+                        //console.log(this.decks[id][moving.type][moving.stack].cards.up);
+                        this.decks[id].stacks[i].alignCards('stacks');
+                        break;
+                    } else {
+                        this.returnMovingCards(id);
                         break;
                     }
                 }
             }
+        } else if (this.checkAceRowCollision(x, y) && moving.cards.length == 1) {
+            for (let i = 0; i < 8; i++) {
+                if (this.checkCardCollision(this.aces[i], x, y)) {
+                    for (let j = 0; j < moving.cards.length; j++) {
+                        this.aces[i].cards.up.push(this.removeCard(id, j));
+                    }
+                    this.decks[id].stacks[i].alignCards();
+                    break;
+                } else {
+                    this.returnMovingCards(id);
+                    break;
+                }
+            }
+        } else {
+            this.returnMovingCards(id);
         }
         this.moving_cards[id] = {cards: []};
     }
     checkStackRowCollision(id, x, y) {
-        return x > this.decks[id].stacks[0].x && x < this.decks[id].stacks[0].x+stacks_width && y > this.decks[id].stacks[0].y && y < this.decks[id].stacks[0].y+HEIGHT;
+        return x > this.decks[id].stacks[0].x && x < this.decks[id].stacks[0].x+stacks_width && y > this.decks[id].stacks[0].y && y < this.decks[id].stacks[0].y+HEIGHT*4;
     }
     checkAceRowCollision(x, y) {
         return x > this.aces[0].x && x < this.aces[0].x+WIDTH && y > this.aces[0].y && y < this.aces[0].y+HEIGHT;
     }
     checkCardCollision(card, x, y) {
         return x > card.x && x < card.x+WIDTH && y > card.y && y < card.y+HEIGHT;
+    }
+    getTopCards(id) {
+        let top_cards = {stacks: [], aces: []};
+        for (let i = 0; i < 7; i++) {
+            top_cards.stacks[i] = this.decks[id].stacks[i].cards.up[this.decks[id].stacks[i].top('up')];
+        }
+        return top_cards;
     }
     toJSON() {
         var json = {};
@@ -138,9 +174,9 @@ module.exports = class Game {
             json.aces[i] = {};
             json.aces[i].x = this.aces[i].x;
             json.aces[i].y = this.aces[i].y;
-            json.aces[i].length = this.aces[i].length;
-            if (this.aces[i].length > 0) {
-                json.aces[i].cards = this.aces[i].cards[this.aces[i].length-1];
+            json.aces[i].length = this.aces[i].length('up');
+            if (this.aces[i].length('up') > 0) {
+                json.aces[i].cards = this.aces[i].cards[this.aces[i].top('up')];
             }
         }
         json.decks = this.decks;

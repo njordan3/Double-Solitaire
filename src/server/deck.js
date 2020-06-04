@@ -28,15 +28,11 @@ module.exports = class Deck {
             hand[i] = {};
             hand[i].x = this.hand[i].x;
             hand[i].y = this.hand[i].y;
-            hand[i].length = this.hand[i].length();
         }
-        if (this.hand[1].length() > 0) {
-            hand[1].cards = [];
-            for (var i = this.hand[1].length()-3; i < this.hand[1].length(); i++) {
-                if (this.hand[1].cards[i] != null) {
-                    hand[1].cards.push(this.hand[1].cards[i]);
-                }
-            }
+        hand[0].length = this.hand[0].length('down');
+        if (this.hand[1].length('up') > 0) {
+            hand[1].cards = this.hand[1].cards.up;
+            hand[1].length = this.hand[1].length('up');
         }
         // send the stacks with only the cards that are face up
         var stacks = [];
@@ -44,16 +40,14 @@ module.exports = class Deck {
             stacks[i] = {};
             stacks[i].x = this.stacks[i].x;
             stacks[i].y = this.stacks[i].y;
-            stacks[i].length = this.stacks[i].length();
+            console.log(i, this.stacks[i].length('up'));
+            stacks[i].length = this.stacks[i].length('up')+this.stacks[i].length('down');
             stacks[i].cards = [];
-            var temp = 0;
-            for (var j = 0; j < this.stacks[i].length(); j++) {
-                if (this.stacks[i].cards[j].face) {
-                    stacks[i].cards[temp] = this.stacks[i].cards[j];
-                    temp++;
-                }
+            for (var j = 0; j < this.stacks[i].length('up'); j++) {
+                stacks[i].cards[j] = this.stacks[i].cards.up[j];
             }
         }
+        console.log("================");
         return {
             hand: hand,
             stacks: stacks
@@ -64,7 +58,7 @@ module.exports = class Deck {
         this.hand.push(new Stack(0, -(HEIGHT+Y_CARD_DIST)));
         for (var i = 0; i < 4; i++) {
             for (var j = 0; j < 13; j++) {
-                this.hand[0].addCard(new Card(suits[i].suit, ranks[j], i, j, suits[i].color));
+                this.hand[0].addCard('down', new Card(suits[i].suit, ranks[j], i, j, suits[i].color));
             }
         }
         this.hand.push(new Stack(WIDTH+X_CARD_DIST, -(HEIGHT+Y_CARD_DIST)));
@@ -74,24 +68,15 @@ module.exports = class Deck {
         }
     }
 
-    // gets the last element in the hand and remove it from the hand
-    topCardInHand(index) {
-        // return if empty
-        if (this.hand[index].cards === undefined || this.hand[index].length() == 0) {
-            return void 0;
-        }
-        return this.hand[index].cards.pop();
-    }
-
     // based on the Fisher-Yates shuffle algorithm
     // a random card in the hand will swap with the 
     // last card that has not yet been chosen
     shuffleHand() {
-        for (var i = this.hand[0].top(); i > 0; i--) {
+        for (var i = this.hand[0].top('down'); i > 0; i--) {
             var random = generateRandomInt(0, i);
-            var temp = this.hand[0].cards[random];
-            this.hand[0].cards[random] = this.hand[0].cards[i];
-            this.hand[0].cards[i] = temp;
+            var temp = this.hand[0].cards.down[random];
+            this.hand[0].cards.down[random] = this.hand[0].cards.down[i];
+            this.hand[0].cards.down[i] = temp;
         }
     }
 
@@ -100,35 +85,35 @@ module.exports = class Deck {
         // pop cards from hand as it goes into a stack
         for (var i = 0; i < 7; i++) {
             for (var j = i; j < 7; j++) {
-                this.stacks[j].addCard(this.topCardInHand(0));
-                this.stacks[j].cards[i].x = this.stacks[j].x;
-                this.stacks[j].cards[i].y = this.stacks[j].y;
+                this.stacks[j].addCard('down', this.hand[0].cards.down.pop());
+                this.stacks[j].cards.down[i].x = this.stacks[j].x;
+                this.stacks[j].cards.down[i].y = this.stacks[j].y;
             }
         }
         // flip the top card of each stack
         for (var i = 0; i < 7; i++) {
-            this.stacks[i].cards[this.stacks[i].top()].flipCard();
+            //this.stacks[i].cards[this.stacks[i].top()].flipCard();
+            this.stacks[i].cards.up[0] = this.stacks[i].cards.down.pop();
+            this.stacks[i].cards.up[0].flipCard();
         }
     }
     dealThree() {
         for (var i = 0; i < 3; i++) {
-            if (this.hand[0].length() !== 0) {
-                this.hand[1].addCard(this.topCardInHand(0));
-                this.hand[1].cards[this.hand[1].top()].x = this.hand[1].x + i*0.33*WIDTH;
-                this.hand[1].cards[this.hand[1].top()].y = this.hand[1].y;
-                this.hand[1].cards[this.hand[1].top()].flipCard();
+            if (this.hand[0].length('down') != 0) {
+                this.hand[1].addCard('up', this.hand[0].cards.down.pop());
+                this.hand[1].cards.up[this.hand[1].top('up')].x = this.hand[1].x + i*0.33*WIDTH;
+                this.hand[1].cards.up[this.hand[1].top('up')].y = this.hand[1].y;
+            } else {
+                break;
             }
         }
     }
     returnToHand() {
-        var length = this.hand[1].length;
+        var length = this.hand[1].length('up');
         for (var i = 0; i < length; i++) {
-            this.hand[0].addCard(this.topCardInHand(1));
-            this.hand[0].cards[i].x = this.hand[0].x;
-            this.hand[0].cards[i].y = this.hand[0].y;
-            this.hand[0].cards[i].flipCard();
+            this.hand[0].addCard('down', this.hand[1].cards.up.pop());
+            this.hand[0].cards.down[i].x = this.hand[0].x;
+            this.hand[0].cards.down[i].y = this.hand[0].y;
         }
-        this.hand[1].cards = [];
-        this.hand[1].length = 0;
     }
 }
