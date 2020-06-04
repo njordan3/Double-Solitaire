@@ -30,9 +30,9 @@ module.exports = class Deck {
             hand[i].y = this.hand[i].y;
         }
         hand[0].length = this.hand[0].length('down');
+        hand[1].length = this.hand[1].length('up')
         if (this.hand[1].length('up') > 0) {
-            hand[1].cards = this.hand[1].cards.up;
-            hand[1].length = this.hand[1].length('up');
+            hand[1].cards = this.hand[1].cards.up.slice(hand[1].length-this.hand[1].dealt, hand[1].length);
         }
         // send the stacks with only the cards that are face up
         var stacks = [];
@@ -40,14 +40,12 @@ module.exports = class Deck {
             stacks[i] = {};
             stacks[i].x = this.stacks[i].x;
             stacks[i].y = this.stacks[i].y;
-            console.log(i, this.stacks[i].length('up'));
             stacks[i].length = this.stacks[i].length('up')+this.stacks[i].length('down');
             stacks[i].cards = [];
             for (var j = 0; j < this.stacks[i].length('up'); j++) {
                 stacks[i].cards[j] = this.stacks[i].cards.up[j];
             }
         }
-        console.log("================");
         return {
             hand: hand,
             stacks: stacks
@@ -101,15 +99,15 @@ module.exports = class Deck {
         for (var i = 0; i < 3; i++) {
             if (this.hand[0].length('down') != 0) {
                 this.hand[1].addCard('up', this.hand[0].cards.down.pop());
-                this.hand[1].cards.up[this.hand[1].top('up')].x = this.hand[1].x + i*0.33*WIDTH;
-                this.hand[1].cards.up[this.hand[1].top('up')].y = this.hand[1].y;
             } else {
                 break;
             }
         }
+        this.hand[1].dealt = 3;
+        this.hand[1].alignCards('hand');
     }
     returnToHand() {
-        var length = this.hand[1].length('up');
+        let length = this.hand[1].length('up');
         for (var i = 0; i < length; i++) {
             this.hand[0].addCard('down', this.hand[1].cards.up.pop());
             this.hand[0].cards.down[i].x = this.hand[0].x;

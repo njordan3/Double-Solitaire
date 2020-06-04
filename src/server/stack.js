@@ -10,22 +10,35 @@ module.exports = class Stack {
     addCard(index, card) {
         this.cards[index].push(card);
     }
+    flipCard() {
+        this.cards.up.push(this.cards.down.pop());
+    }
     alignCards(style) {
-        for (let i = 0; i < this.length('up'); i++) {
-            switch(style) {
-                case 'stacks':
+        switch(style) {
+            case 'stacks':
+                for (let i = 0; i < this.length('up'); i++) {
                     this.cards.up[i].x = this.x;
                     this.cards.up[i].y = this.y + i*0.33*HEIGHT;
-                    break;
-                case 'hand':
-                    this.cards.up[i].x = this.x + i*0.33*WIDTH;
+                }
+                break;
+            case 'hand':
+                let length = this.length('up');
+                let j = 0;
+                for (let i = length-this.dealt; i < length; i++) {
+                    if (i < 0) {
+                        i = 0;
+                    }
+                    this.cards.up[i].x = this.x + j*0.33*WIDTH;
                     this.cards.up[i].y = this.y;
-                    break;
-                default:
+                    j++;
+                }
+                break;
+            default:
+                for (let i = 0; i < this.length('up'); i++) {
                     this.cards.up[i].x = this.x;
                     this.cards.up[i].y = this.y;
-                    break;
-            }
+                }
+                break;
         }
     }
     top(index) {

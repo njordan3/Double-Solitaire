@@ -59,7 +59,7 @@ io.on('connection', function(socket) {
         if (!skip_events) {
             var info = JSON.parse(input);
             //console.log('drag');
-            game.moveCard(socket.id, info.x, info.y);
+            game.moveCardPos(socket.id, info.x, info.y);
             sendUpdateToPlayers('update');
         }
     });

@@ -108,6 +108,12 @@ function renderCards() {
         }
     }
     // ace render stacks
+    for (let i = 0; i < 8; i++) {
+        if (aces[i].cards != undefined && aces[i].cards.length != 0) {
+            let card = aces[i].cards;
+            drawCard(card.x, card.y, card.rank_val * WIDTH, card.suit_val * HEIGHT);
+        }
+    }
     /*
     for (var i = 0; i < 8; i++) {
         context.save();
