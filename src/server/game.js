@@ -55,6 +55,7 @@ module.exports = class Game {
                     if (stacks[i].length('down') != 0) {
                         if (this.checkCardCollision(stacks[i], x, y)) {
                             this.decks[id].stacks[i].flipCard();
+                            break;
                         }
                     }
                 } else {
@@ -104,6 +105,7 @@ module.exports = class Game {
     placeCard(id, x, y) {
         let moving = this.moving_cards[id];
         let top_cards = this.getTopCards(id);
+        console.log(top_cards);
         if (this.checkStackRowCollision(id, x, y)) {
             let collision = false;
             for (let i = 0; i < 7; i++) {
@@ -177,6 +179,7 @@ module.exports = class Game {
         return x > this.aces[0].x && x < this.aces[0].x+aces_width && y > this.aces[0].y && y < this.aces[0].y+HEIGHT;
     }
     checkCardCollision(card, x, y) {
+        console.log("here");
         return x > card.x && x < card.x+WIDTH && y > card.y && y < card.y+HEIGHT;
     }
     getTopCards(id) {
