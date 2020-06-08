@@ -107,7 +107,7 @@ module.exports = class Game {
         if (this.checkStackRowCollision(id, x, y)) {
             let collision = false;
             for (let i = 0; i < 7; i++) {
-                if (top_cards.stacks[i] != undefined && i != moving.stack) {
+                if (top_cards.stacks[i] != undefined && (i != moving.stack || moving.type == 'hand')) {
                     if (this.checkCardCollision(top_cards.stacks[i], x, y) && this.checkPlacement(this.decks[id][moving.type][moving.stack].cards.up[moving.cards[0]], this.decks[id].stacks[i], true)) {
                         for (let j = 0; j < moving.cards.length; j++) {
                             this.decks[id].stacks[i].addCard('up', this.moveCardStack(id));
