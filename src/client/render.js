@@ -154,6 +154,7 @@ function renderCards() {
 }
 
 function renderBoxes() {
+    /*
     context.save();
     context.translate(translation.x, translation.y);
     //context.globalAlpha = 0.5;
@@ -167,6 +168,7 @@ function renderBoxes() {
     context.rect(boxes.enemy.x, boxes.enemy.y, boxes.enemy.width, boxes.enemy.height);
     context.stroke();
     context.restore();
+    */
 }
 
 /* snippet taken from https://stackoverflow.com/questions/19585999/canvas-drawimage-with-round-corners */

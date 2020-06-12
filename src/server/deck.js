@@ -22,7 +22,6 @@ module.exports = class Deck {
         this.dealCards();
     }
     toJSON() {
-        // send the hand with only the three top cards in the flip pile
         var hand = [];
         for (var i = 0; i < this.hand.length; i++) {
             hand[i] = {};
@@ -31,9 +30,7 @@ module.exports = class Deck {
         }
         hand[0].length = this.hand[0].length('down');
         hand[1].length = this.hand[1].length('up')
-        if (this.hand[1].length('up') > 0) {
-            hand[1].cards = this.hand[1].cards.up.slice(hand[1].length-this.hand[1].dealt, hand[1].length);
-        }
+        hand[1].cards = this.hand[1].cards.up;
         // send the stacks with only the cards that are face up
         var stacks = [];
         for (var i = 0; i < this.stacks.length; i++) {
