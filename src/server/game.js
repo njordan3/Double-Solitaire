@@ -18,6 +18,8 @@ module.exports = class Game {
             - and card indexes in the stack
         */
         this.moving_cards = {};
+        this.placed_cards = {};
+        this.flipped_cards = {};
         for (var i = 0; i < 8; i++) {
             this.aces[i] = new Stack(i*(WIDTH+X_CARD_DIST), 0);
         }
@@ -27,6 +29,8 @@ module.exports = class Game {
         this.players[id] = name;
         this.players.count++;
         this.moving_cards[id] = {};
+        this.placed_cards[id] = {};
+        this.flipped_cards[id] = {};
         this.moving_cards[id].cards = [];
     }
     removePlayer(id) {
@@ -43,9 +47,11 @@ module.exports = class Game {
         if (this.checkCardCollision(hand[0], x, y)) {
             if (hand[0].length('down') == 0) {
                 this.decks[id].returnToHand();
+                this.setFlippedCards(id, 'hand', 0);
                 return false;
             } else {
                 this.decks[id].dealThree();
+                this.setFlippedCards(id, 'hand', 1);
                 return false;
             }
         } else if (this.checkStackRowCollision(id, x, y)) {
@@ -55,6 +61,8 @@ module.exports = class Game {
                     if (stacks[i].length('down') != 0) {
                         if (this.checkCardCollision(stacks[i], x, y)) {
                             this.decks[id].stacks[i].flipCard();
+                            this.setFlippedCards(id, 'stacks', i);
+                            break;
                         }
                     }
                 } else {
@@ -79,12 +87,20 @@ module.exports = class Game {
         }
         return false;
     }
-    setMovingCards(id, type, i, j, x, y) {
+    setMovingCards(id, type, stack, cards, x, y) {
         this.moving_cards[id].type = type;
-        this.moving_cards[id].stack = i;
-        this.moving_cards[id].cards = j;
+        this.moving_cards[id].stack = stack;
+        this.moving_cards[id].cards = cards;
         this.moving_cards[id].x = x;
         this.moving_cards[id].y = y;
+    }
+    setPlacedCards(id, type, stack) {
+        this.placed_cards[id].dest = {type: type, stack: stack};
+        this.placed_cards[id].src = {type: this.moving_cards[id].type, stack: this.moving_cards[id].stack};
+    }
+    setFlippedCards(id, type, stack) {
+        this.flipped_cards[id].type = type;
+        this.flipped_cards[id].stack = stack;
     }
     moveCardPos(id, x, y) {
         let temp = this.moving_cards[id];
@@ -104,11 +120,12 @@ module.exports = class Game {
     placeCard(id, x, y) {
         let moving = this.moving_cards[id];
         let top_cards = this.getTopCards(id);
+        let collision = false;
         if (this.checkStackRowCollision(id, x, y)) {
-            let collision = false;
             for (let i = 0; i < 7; i++) {
                 if (top_cards.stacks[i] != undefined && (i != moving.stack || moving.type == 'hand')) {
                     if (this.checkCardCollision(top_cards.stacks[i], x, y) && this.checkPlacement(this.decks[id][moving.type][moving.stack].cards.up[moving.cards[0]], this.decks[id].stacks[i], true)) {
+                        this.setPlacedCards(id, 'stacks', i);
                         for (let j = 0; j < moving.cards.length; j++) {
                             this.decks[id].stacks[i].addCard('up', this.moveCardStack(id));
                         }
@@ -118,13 +135,10 @@ module.exports = class Game {
                     }
                 }
             }
-            if (!collision) {
-                this.decks[id][moving.type][moving.stack].alignCards(moving.type);
-            }
         } else if (this.checkAceRowCollision(x, y) && moving.cards.length == 1) {
-            let collision = false;
             for (let i = 0; i < 8; i++) {
                 if (this.checkCardCollision(this.aces[i], x, y) && this.checkPlacement(this.decks[id][moving.type][moving.stack].cards.up[moving.cards[0]], this.aces[i], false)) {
+                    this.setPlacedCards(id, 'aces', i);
                     for (let j = 0; j < moving.cards.length; j++) {
                         this.aces[i].addCard('up', this.moveCardStack(id));
                     }
@@ -133,13 +147,11 @@ module.exports = class Game {
                     break;
                 }
             }
-            if (!collision) {
-                this.decks[id][moving.type][moving.stack].alignCards(moving.type);
-
-            }
-        } else {
-            this.decks[id][moving.type][moving.stack].alignCards(moving.type);
         }
+        if (!collision) {
+            this.setPlacedCards(id, moving.type, moving.stack);
+        }
+        this.decks[id][moving.type][moving.stack].alignCards(moving.type);
         this.moving_cards[id] = {cards: []};
     }
     checkPlacement(card, dest, stack) {
@@ -191,10 +203,10 @@ module.exports = class Game {
         return top_cards;
     }
     toJSON() {
-        var json = {};
+        let json = {};
         // send only the last card of each ace stack
         json.aces = [];
-        for (var i = 0; i < this.aces.length; i++) {
+        for (let i = 0; i < this.aces.length; i++) {
             json.aces[i] = {};
             json.aces[i].x = this.aces[i].x;
             json.aces[i].y = this.aces[i].y;
@@ -205,6 +217,55 @@ module.exports = class Game {
         }
         json.decks = this.decks;
         json.players = this.players;
+        return json;
+    }
+    movingCardsUpdate(id) {
+        let moving = this.moving_cards[id];
+        let json = {};
+        json.player = id;
+        json.type = moving.type;
+        json.stack = moving.stack;
+        json.indexes = [];
+        json.cards = [];
+        for (let i = 0; i < moving.cards.length; i++) {
+            json.indexes[i] = moving.cards[i];
+            json.cards[i] = {};
+            json.cards[i].x = this.decks[id][moving.type][moving.stack].cards.up[moving.cards[i]].x;
+            json.cards[i].y = this.decks[id][moving.type][moving.stack].cards.up[moving.cards[i]].y;
+        }
+        return json;
+    }
+    placedCardsUpdate(id) {
+        let placed = this.placed_cards[id];
+        let json = {};
+        json.player = id;
+        json.dest = placed.dest;
+        if (placed.dest.type == 'aces') {
+            json.dest.cards = this.aces[placed.dest.stack].cards.up[this.aces[placed.dest.stack].top('up')];
+            json.aces = true;
+        } else {
+            json.dest.cards = this.decks[id][placed.dest.type][placed.dest.stack];
+        }
+        json.src = placed.src;
+        json.src.cards = this.decks[id][placed.src.type][placed.src.stack];
+        this.placed_cards[id] = {};
+        return json;
+    }
+    flippedCardsUpdate(id) {
+        let json = {};
+        if (Object.keys(this.flipped_cards[id]).length != 0) {
+            let flipped = this.flipped_cards[id];
+            json.player = id;
+            json.type = flipped.type;
+            json.stack = flipped.stack;
+            let temp = JSON.parse(JSON.stringify(this.decks[id]));
+            if (flipped.type == 'hand') {
+                json.cards = temp[flipped.type];
+            } else {
+                json.cards = temp[flipped.type][flipped.stack].cards;
+            }
+            this.flipped_cards[id] = {};
+        }
         return json;
     }
 }

@@ -53,11 +53,11 @@ export function setBoxes() {
 function resizeCanvas() {
     // scale canvas and card positions according to the size of the window
     canvas1.width = canvas2.width = window.innerWidth;
-    canvas1.height = canvas2.width = window.innerHeight;
+    canvas1.height = canvas2.height = window.innerHeight;
     translation = {
-        x: canvas1.width/2 - WIDTH*4 - 3.5*X_CARD_DIST,
-        y: canvas1.height/2 - HEIGHT/2,
-        enemyX: canvas1.width - ENEMY_SCALE*7*WIDTH - ENEMY_SCALE*10*X_CARD_DIST,
+        x: canvas2.width/2 - WIDTH*4 - 3.5*X_CARD_DIST,
+        y: canvas2.height/2 - HEIGHT/2,
+        enemyX: canvas2.width - ENEMY_SCALE*7*WIDTH - ENEMY_SCALE*10*X_CARD_DIST,
         enemyY: Y_CARD_DIST*ENEMY_SCALE
     };
     boxes.enemy = {

@@ -26,7 +26,7 @@ io.on('connection', function(socket) {
             console.log(input+" connected!");
             sockets[socket.id] = socket;
             game.addPlayer(socket.id, input);
-            sendUpdateToPlayers('init');
+            sendUpdateToPlayers('init', game);
         }
         else {
             socket.emit('server_full');
@@ -36,14 +36,15 @@ io.on('connection', function(socket) {
         console.log(game.players[socket.id]+" disconnected");
         delete sockets[socket.id];
         game.removePlayer(socket.id);
-        sendUpdateToPlayers('update');
+        sendUpdateToPlayers('update', game);
     });
     socket.on('mouseup', function(input) {
         if (!skip_events) {
             //console.log("up");
             var info = JSON.parse(input);
             game.placeCard(socket.id, info.x, info.y);
-            sendUpdateToPlayers('update');
+            let update = game.placedCardsUpdate(socket.id);
+            sendUpdateToPlayers('placed', update);
         }
         skip_events = false;
     });
@@ -52,7 +53,10 @@ io.on('connection', function(socket) {
         //console.log("down");
         if (!game.decideAction(socket.id, info.x, info.y)) {
             skip_events = true;
-            sendUpdateToPlayers('update');
+            let update = game.flippedCardsUpdate(socket.id);
+            if (Object.keys(update).length != 0) {
+                sendUpdateToPlayers('flip', update);
+            }
         }
     });
     socket.on('mousemove', function(input) {
@@ -60,13 +64,14 @@ io.on('connection', function(socket) {
             var info = JSON.parse(input);
             //console.log('drag');
             game.moveCardPos(socket.id, info.x, info.y);
-            sendUpdateToPlayers('update');
+            let update = game.movingCardsUpdate(socket.id);
+            sendUpdateToPlayers('moving', update);
         }
     });
 });
 
-function sendUpdateToPlayers(type) {
+function sendUpdateToPlayers(type, update) {
     for (var id in sockets) {
-        sockets[id].emit(type, JSON.stringify(game));
+        sockets[id].emit(type, JSON.stringify(update));
     }
 }

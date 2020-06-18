@@ -24,13 +24,12 @@ module.exports = class Stack {
             case 'hand':
                 let length = this.length('up');
                 let j = 0;
-                for (let i = length-this.dealt; i < length; i++) {
-                    if (i < 0) {
-                        i = 0;
-                    }
+                for (let i = 0; i < length; i++) {
                     this.cards.up[i].x = this.x + j*0.33*WIDTH;
                     this.cards.up[i].y = this.y;
-                    j++;
+                    if (length-i <= 3) {
+                        j++;
+                    }
                 }
                 let count = 3;
                 for (let i = this.top('up'); i >= 0; i--) {
@@ -57,7 +56,7 @@ module.exports = class Stack {
         return {
             x: this.x,
             y: this.y,
-            cards: this.cards,
+            cards: this.cards.up,
             length: this.length('up')+this.length('down')
         };
     }
