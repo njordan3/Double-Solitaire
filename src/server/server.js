@@ -27,7 +27,8 @@ io.on('connection', function(socket) {
             sockets[socket.id] = socket;
             game.addPlayer(socket.id, input);
             skip_events[socket.id] = false;
-            sendUpdateToPlayers('init', game);
+            socket.emit('init', JSON.stringify(game));
+            sendUpdateToPlayers('update', game);
         }
         else {
             socket.emit('server_full');
@@ -42,7 +43,6 @@ io.on('connection', function(socket) {
     });
     socket.on('mouseup', function(input) {
         if (!skip_events[socket.id]) {
-            //console.log("up");
             var info = JSON.parse(input);
             game.placeCard(socket.id, info.x, info.y);
             let update = game.placedCardsUpdate(socket.id);
@@ -52,7 +52,6 @@ io.on('connection', function(socket) {
     });
     socket.on('mousedown', function(input) {
         var info = JSON.parse(input);
-        //console.log("down");
         if (!game.decideAction(socket.id, info.x, info.y)) {
             skip_events[socket.id] = true;
             let update = game.flippedCardsUpdate(socket.id);
@@ -64,7 +63,6 @@ io.on('connection', function(socket) {
     socket.on('mousemove', function(input) {
         if (!skip_events[socket.id]) {
             var info = JSON.parse(input);
-            //console.log('drag');
             game.moveCardPos(socket.id, info.x, info.y);
             let update = game.movingCardsUpdate(socket.id);
             sendUpdateToPlayers('moving', update);

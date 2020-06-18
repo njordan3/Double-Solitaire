@@ -5,30 +5,33 @@ import {startEventListeners} from './inputs';
 export var enemy = {};
 export var me = {};
 export var aces = {};
-export var game_started = false;
 export var cancel_events = false;
 
 var socket;
 
-export function Login(name) {
+export function Login(name, timeout = 10000) {
     socket = io();
     console.log(name+" found!");
-    socket.emit('login', name);
     setupCallBacks();
+    return new Promise((resolve, reject) => {
+        let timer
+        socket.emit('login', name);
+        socket.once('init', (msg) => {
+            processUpdate(msg);
+            setBoxes();
+            startEventListeners();
+            resolve('init received');
+            clearTimeout(timer);
+        });
+        timer = setTimeout(() => {
+            reject(new Error("timeout waiting to login"));
+        }, timeout);
+    });
 }
 
 function setupCallBacks() {
-    socket.on('init', (msg) => {
-        readUpdate(msg);
-        console.log(enemy);
-        setBoxes();
-        if (!game_started) {
-            startEventListeners();
-            game_started = true;
-        }
-    });
     socket.on('update', (msg) => {
-        readUpdate(msg);
+        processUpdate(msg);
     });
     socket.on('moving', (msg) => {
         let update = JSON.parse(msg);
@@ -47,7 +50,7 @@ function setupCallBacks() {
     });
 }
 
-function readUpdate(msg) {
+function processUpdate(msg) {
     let update = JSON.parse(msg);
     let players = Object.keys(update.decks);
     for (let id in players) {

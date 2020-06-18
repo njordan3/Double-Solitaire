@@ -106,7 +106,7 @@ module.exports = class Game {
         let temp = this.moving_cards[id];
         for (var i = 0; i < temp.cards.length; i++) {
             this.decks[id][temp.type][temp.stack].cards.up[temp.cards[i]].x = x - temp.x;
-            this.decks[id][temp.type][temp.stack].cards.up[temp.cards[i]].y = y - temp.y;
+            this.decks[id][temp.type][temp.stack].cards.up[temp.cards[i]].y = y - temp.y + i*0.33*HEIGHT;
         }
     }
     moveCardStack(id, index = 0) {

@@ -5,7 +5,7 @@ html,body {
     background-color: black;
   }
 
-  #game-canvas {
+  #background {
     display:none;
     /*border: solid black 1px;*/
     background-image: url('../../../public/tabletop.jpg');
@@ -14,4 +14,12 @@ html,body {
     height: 600px;*/
     /*margin: auto;*/
     /*margin-top: 20px;*/
+    position: absolute;
+    z-index: 1;
+  }
+  #foreground {
+    display:none;
+    background-color: transparent;
+    position: absolute;
+    z-index: 2;
   }

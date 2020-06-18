@@ -94,7 +94,7 @@ module.exports = class Deck {
     }
     dealThree() {
         for (var i = 0; i < 3; i++) {
-            if (this.hand[0].length('down') != 0) {
+            if (this.hand[0].length('down') > 0) {
                 this.hand[1].addCard('up', this.hand[0].cards.down.pop());
             } else {
                 break;
