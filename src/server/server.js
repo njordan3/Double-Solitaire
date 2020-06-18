@@ -9,7 +9,7 @@ const port = 3000;
 var sockets = {};
 var game = new Game();
 
-var skip_events = false;
+var skip_events = {};
 
 // middleware
 app.use(bodyParser.urlencoded({extended:true}));
@@ -26,6 +26,7 @@ io.on('connection', function(socket) {
             console.log(input+" connected!");
             sockets[socket.id] = socket;
             game.addPlayer(socket.id, input);
+            skip_events[socket.id] = false;
             sendUpdateToPlayers('init', game);
         }
         else {
@@ -35,24 +36,25 @@ io.on('connection', function(socket) {
     socket.on('disconnect', function() {
         console.log(game.players[socket.id]+" disconnected");
         delete sockets[socket.id];
+        delete skip_events[socket.id];
         game.removePlayer(socket.id);
         sendUpdateToPlayers('update', game);
     });
     socket.on('mouseup', function(input) {
-        if (!skip_events) {
+        if (!skip_events[socket.id]) {
             //console.log("up");
             var info = JSON.parse(input);
             game.placeCard(socket.id, info.x, info.y);
             let update = game.placedCardsUpdate(socket.id);
             sendUpdateToPlayers('placed', update);
         }
-        skip_events = false;
+        skip_events[socket.id] = false;
     });
     socket.on('mousedown', function(input) {
         var info = JSON.parse(input);
         //console.log("down");
         if (!game.decideAction(socket.id, info.x, info.y)) {
-            skip_events = true;
+            skip_events[socket.id] = true;
             let update = game.flippedCardsUpdate(socket.id);
             if (Object.keys(update).length != 0) {
                 sendUpdateToPlayers('flip', update);
@@ -60,7 +62,7 @@ io.on('connection', function(socket) {
         }
     });
     socket.on('mousemove', function(input) {
-        if (!skip_events) {
+        if (!skip_events[socket.id]) {
             var info = JSON.parse(input);
             //console.log('drag');
             game.moveCardPos(socket.id, info.x, info.y);

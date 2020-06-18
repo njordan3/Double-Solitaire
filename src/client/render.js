@@ -55,8 +55,8 @@ function resizeCanvas() {
     translation = {
         x: canvas.width/2 - WIDTH*4 - 3.5*X_CARD_DIST,
         y: canvas.height/2 - HEIGHT/2,
-        enemyX: canvas.width - ENEMY_SCALE*7*WIDTH - ENEMY_SCALE*10*X_CARD_DIST,
-        enemyY: Y_CARD_DIST*ENEMY_SCALE
+        enemyX: canvas.width - ENEMY_SCALE*8*WIDTH - ENEMY_SCALE*8*X_CARD_DIST,
+        enemyY: (Y_CARD_DIST-HEIGHT)*ENEMY_SCALE
     };
     boxes.enemy = {
         x: -translation.x + translation.enemyX - ENEMY_SCALE*2*X_CARD_DIST,
@@ -107,6 +107,7 @@ function renderCards() {
             }
         }
     }
+    
     // ace render stacks
     for (let i = 0; i < 8; i++) {
         if (aces[i].cards != undefined && aces[i].cards.length != 0) {
@@ -114,43 +115,27 @@ function renderCards() {
             drawCard(card.x, card.y, card.rank_val * WIDTH, card.suit_val * HEIGHT);
         }
     }
-    /*
-    for (var i = 0; i < 8; i++) {
-        context.save();
-        context.translate(translation.x, translation.y);
-        context.fillStyle = "black";
-        context.fillRect(
-            aces[i].x, aces[i].y,
-            WIDTH, HEIGHT
-        );
-        context.restore();
-    }
     // enemy render stacks
-    for (var i = 0; i < 7; i++) {
-        var sx = Card_back.x;
-        var sy = Card_back.y;
-        // if enemy doesnt exist or if the stack is empty, then render the back of the card
-        if (enemy != undefined && enemy.stacks[i].length !== 0) {
-            var last_in_stack = enemy.stacks[i].cards[enemy.stacks[i].length-1];
-            if (last_in_stack.face) {
-                sx = last_in_stack.rank_val * WIDTH;
-                sy = last_in_stack.suit_val * HEIGHT;
+    if (Object.keys(enemy).length != 0) {
+        for (let i = 0; i < 7; i++) {
+            if (enemy.stacks[i].length > enemy.stacks[i].cards.length) {
+                drawCard(enemy.stacks[i].x, -enemy.stacks[i].y, Card_back.x, Card_back.y, Math.PI);
+            }
+            for (let j = 0; j < enemy.stacks[i].cards.length; j++) {
+                let card = enemy.stacks[i].cards[j];
+                drawCard(card.x, -card.y, card.rank_val * WIDTH, card.suit_val * HEIGHT, Math.PI);
             }
         }
-        context.save();
-        context.translate(translation.enemyX, translation.enemyY);
-        //roundImage(enemy_stack_pos[i].dx, enemy_stack_pos[i].dy, enemy_stack_pos.dWidth, enemy_stack_pos.dHeight, 5);
-        //context.clip();
-        context.drawImage(
-            Deck, 
-            sx, sy, 
-            WIDTH, HEIGHT, 
-            i*ENEMY_SCALE*(WIDTH+X_CARD_DIST), 0, 
-            WIDTH*ENEMY_SCALE, HEIGHT*ENEMY_SCALE);
-        context.restore();
-    
+        if (enemy.hand[0].length > 0) {
+            drawCard(-enemy.hand[0].x+7*WIDTH+6*X_CARD_DIST, -enemy.hand[0].y, Card_back.x, Card_back.y, Math.PI);
+        }
+        if (enemy.hand[1].length > 0) {
+            for (var i = 0; i < enemy.hand[1].cards.length; i++) {
+                var card = enemy.hand[1].cards[i];
+                drawCard(-card.x+7*WIDTH+6*X_CARD_DIST, -card.y, card.rank_val * WIDTH, card.suit_val * HEIGHT, Math.PI);
+            }
+        }
     }
-    */
 }
 
 function renderBoxes() {
@@ -186,9 +171,14 @@ function roundImage(x, y, width, height, radius) {
     context.closePath();
 }
 
-function drawCard(x, y, sx, sy) {
+function drawCard(x, y, sx, sy, rotate = 0) {
     context.save();
     context.translate(translation.x, translation.y);
+    if (rotate) {
+        context.rotate(rotate);
+        x = -x - WIDTH - X_CARD_DIST;
+        y = -y - HEIGHT;
+    }
     context.drawImage(
         Deck, 
         sx, sy, 

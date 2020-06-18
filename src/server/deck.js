@@ -50,13 +50,13 @@ module.exports = class Deck {
     }
     resetDeck() {
         // reset the hand to a brand new unshuffled deck
-        this.hand.push(new Stack(0, -(HEIGHT+Y_CARD_DIST)));
+        this.hand.push(new Stack(-3*(WIDTH+X_CARD_DIST), HEIGHT+Y_CARD_DIST));
         for (var i = 0; i < 4; i++) {
             for (var j = 0; j < 13; j++) {
                 this.hand[0].addCard('down', new Card(suits[i].suit, ranks[j], i, j, suits[i].color));
             }
         }
-        this.hand.push(new Stack(WIDTH+X_CARD_DIST, -(HEIGHT+Y_CARD_DIST)));
+        this.hand.push(new Stack(-2*(WIDTH+X_CARD_DIST), HEIGHT+Y_CARD_DIST));
         // empty the stacks
         for (var i = 0; i < 7; i++) {
             this.stacks[i] = new Stack(i*(WIDTH + X_CARD_DIST)+(X_CARD_DIST+WIDTH)/2, HEIGHT+Y_CARD_DIST);

@@ -20,10 +20,12 @@ export function Login(name) {
 function setupCallBacks() {
     socket.on('init', (msg) => {
         readUpdate(msg);
+        console.log(enemy);
         setBoxes();
-        startEventListeners();
-        game_started = true;
-        
+        if (!game_started) {
+            startEventListeners();
+            game_started = true;
+        }
     });
     socket.on('update', (msg) => {
         readUpdate(msg);
@@ -97,7 +99,11 @@ function processFlippedCards(msg, id) {
             me[msg.type][msg.stack].cards = msg.cards;
         }
     } else {
-        enemy[msg.type][msg.stack].cards = msg.cards;
+        if (msg.type == 'hand') {
+            enemy[msg.type] = msg.cards;
+        } else {
+            enemy[msg.type][msg.stack].cards = msg.cards;
+        }
     }
 }
 
