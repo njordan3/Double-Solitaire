@@ -8,7 +8,11 @@ var username = document.getElementById('in-game-name');
 loadAssets();
 
 playButton.onclick = () => {
-    console.log("here");
-    Login(username.value);
-    startRendering();
+    Login(username.value)
+        .then(() => {
+            startRendering();
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 }

@@ -3,13 +3,15 @@
 // https://www.kirupa.com/html5/resizing_html_canvas_element.htm
 
 import {getAsset} from './assets';
-import {me, enemy, aces, game_started} from './networking';
+import {me, enemy, aces} from './networking';
 const Constants = require('./../shared/constants');
 
 const {ENEMY_SCALE, WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST} = Constants;
 
-export var canvas = document.getElementById('game-canvas');
-var context = canvas.getContext('2d');
+var canvas1 = document.getElementById('background');
+var background = canvas1.getContext('2d');
+var canvas2 = document.getElementById('foreground');
+var foreground = canvas2.getContext('2d');
 
 window.addEventListener("resize", resizeCanvas, false);
 
@@ -50,12 +52,12 @@ export function setBoxes() {
 
 function resizeCanvas() {
     // scale canvas and card positions according to the size of the window
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas1.width = canvas2.width = window.innerWidth;
+    canvas1.height = canvas2.width = window.innerHeight;
     translation = {
-        x: canvas.width/2 - WIDTH*4 - 3.5*X_CARD_DIST,
-        y: canvas.height/2 - HEIGHT/2,
-        enemyX: canvas.width - ENEMY_SCALE*7*WIDTH - ENEMY_SCALE*10*X_CARD_DIST,
+        x: canvas1.width/2 - WIDTH*4 - 3.5*X_CARD_DIST,
+        y: canvas1.height/2 - HEIGHT/2,
+        enemyX: canvas1.width - ENEMY_SCALE*7*WIDTH - ENEMY_SCALE*10*X_CARD_DIST,
         enemyY: Y_CARD_DIST*ENEMY_SCALE
     };
     boxes.enemy = {
@@ -64,11 +66,13 @@ function resizeCanvas() {
         width: ENEMY_SCALE*(7*WIDTH + 8*X_CARD_DIST),
         height: ENEMY_SCALE*(HEIGHT + Y_CARD_DIST)
     };
+    renderBoxes();
 }
 
 export function startRendering() {
     document.getElementById("login").style.display = "none";
-    canvas.style.display = "block";
+    canvas1.style.display = "block";
+    canvas2.style.display = "block";
     Deck = getAsset('Deck_Sprite.gif');
     Card_back = {x: 0, y: Deck.height*4/5};
     resizeCanvas();
@@ -77,11 +81,8 @@ export function startRendering() {
 
 function renderGame() {
     // clear canvas
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    if (game_started) {
-        renderBoxes();
-        renderCards();
-    }
+    foreground.clearRect(0, 0, canvas2.width, canvas2.height);
+    renderCards();
     window.requestAnimationFrame(renderGame);
 }
 
@@ -116,14 +117,14 @@ function renderCards() {
     }
     /*
     for (var i = 0; i < 8; i++) {
-        context.save();
-        context.translate(translation.x, translation.y);
-        context.fillStyle = "black";
-        context.fillRect(
+        foreground.save();
+        foreground.translate(translation.x, translation.y);
+        foreground.fillStyle = "black";
+        foreground.fillRect(
             aces[i].x, aces[i].y,
             WIDTH, HEIGHT
         );
-        context.restore();
+        foreground.restore();
     }
     // enemy render stacks
     for (var i = 0; i < 7; i++) {
@@ -137,61 +138,46 @@ function renderCards() {
                 sy = last_in_stack.suit_val * HEIGHT;
             }
         }
-        context.save();
-        context.translate(translation.enemyX, translation.enemyY);
+        foreground.save();
+        foreground.translate(translation.enemyX, translation.enemyY);
         //roundImage(enemy_stack_pos[i].dx, enemy_stack_pos[i].dy, enemy_stack_pos.dWidth, enemy_stack_pos.dHeight, 5);
-        //context.clip();
-        context.drawImage(
+        //foreground.clip();
+        foreground.drawImage(
             Deck, 
             sx, sy, 
             WIDTH, HEIGHT, 
             i*ENEMY_SCALE*(WIDTH+X_CARD_DIST), 0, 
             WIDTH*ENEMY_SCALE, HEIGHT*ENEMY_SCALE);
-        context.restore();
+        foreground.restore();
     
     }
     */
 }
 
 function renderBoxes() {
-    context.save();
-    context.translate(translation.x, translation.y);
-    //context.globalAlpha = 0.5;
-    context.strokeStyle = "gold";
-    //context.lineJoin = "round";
+    background.save();
+    background.translate(translation.x, translation.y);
+    //background.globalAlpha = 0.5;
+    background.strokeStyle = "gold";
+    //background.lineJoin = "round";
     // this line destroys performance for some reason
-    //context.lineWidth = 5;
-    context.rect(boxes.aces.x, boxes.aces.y, boxes.aces.width, boxes.aces.height);
-    context.rect(boxes.hand.x, boxes.hand.y, boxes.hand.width, boxes.hand.height);
-    context.rect(boxes.stacks.x, boxes.stacks.y, boxes.stacks.width, boxes.stacks.height);
-    context.rect(boxes.enemy.x, boxes.enemy.y, boxes.enemy.width, boxes.enemy.height);
-    context.stroke();
-    context.restore();
-}
-
-/* snippet taken from https://stackoverflow.com/questions/19585999/canvas-drawimage-with-round-corners */
-function roundImage(x, y, width, height, radius) {
-    context.beginPath();
-    context.moveTo(x + radius, y);
-    context.lineTo(x + width - radius, y);
-    context.quadraticCurveTo(x + width, y, x + width, y + radius);
-    context.lineTo(x + width, y + height - radius);
-    context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    context.lineTo(x + radius, y + height);
-    context.quadraticCurveTo(x, y + height, x, y + height - radius);
-    context.lineTo(x, y + radius);
-    context.quadraticCurveTo(x, y, x + radius, y);
-    context.closePath();
+    //background.lineWidth = 5;
+    background.rect(boxes.aces.x, boxes.aces.y, boxes.aces.width, boxes.aces.height);
+    background.rect(boxes.hand.x, boxes.hand.y, boxes.hand.width, boxes.hand.height);
+    background.rect(boxes.stacks.x, boxes.stacks.y, boxes.stacks.width, boxes.stacks.height);
+    background.rect(boxes.enemy.x, boxes.enemy.y, boxes.enemy.width, boxes.enemy.height);
+    background.stroke();
+    background.restore();
 }
 
 function drawCard(x, y, sx, sy) {
-    context.save();
-    context.translate(translation.x, translation.y);
-    context.drawImage(
+    foreground.save();
+    foreground.translate(translation.x, translation.y);
+    foreground.drawImage(
         Deck, 
         sx, sy, 
         WIDTH, HEIGHT, 
         x, y, 
         WIDTH, HEIGHT);
-    context.restore();
+    foreground.restore();
 }

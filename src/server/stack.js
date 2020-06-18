@@ -32,6 +32,12 @@ module.exports = class Stack {
                     this.cards.up[i].y = this.y;
                     j++;
                 }
+                let count = 3;
+                for (let i = this.top('up'); i >= 0; i--) {
+                    this.cards.up[i].x = this.x + count*0.33*WIDTH;
+                    this.cards.up[i].y = this.y;
+                    count--;
+                }
                 break;
             default:
                 for (let i = 0; i < this.length('up'); i++) {
