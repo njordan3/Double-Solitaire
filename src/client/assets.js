@@ -1,7 +1,8 @@
 import cards from '../../public/Deck_Sprite.png';
 import cards2 from '../../public/Deck_Sprite.gif';
+import felt from '../../public/tabletop.jpg';
 
-const ASSET_NAMES = ['Deck_Sprite.png', 'Deck_Sprite.gif'];
+const ASSET_NAMES = ['Deck_Sprite.png', 'Deck_Sprite.gif', 'tabletop.jpg'];
 var assets = [];
 
 export function loadAssets() {
@@ -18,6 +19,13 @@ export function loadAssets() {
         assets[ASSET_NAMES[1]] = img2;
     }
     img2.src = `/${cards2}`;
+
+    var img3 = new Image();
+    img3.onload = () => {
+        console.log(`downloading ${felt}`);
+        assets[ASSET_NAMES[2]] = img3;
+    }
+    img3.src = `/${felt}`;
 }
 
 export function getAsset(assetName) {

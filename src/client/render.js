@@ -6,20 +6,27 @@ import {getAsset} from './assets';
 import {me, enemy, aces} from './networking';
 const Constants = require('./../shared/constants');
 
-const {ENEMY_SCALE, WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST} = Constants;
+const {WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST} = Constants;
 
 var canvas1 = document.getElementById('background');
 var background = canvas1.getContext('2d');
 var canvas2 = document.getElementById('foreground');
 var foreground = canvas2.getContext('2d');
-
 window.addEventListener("resize", resizeCanvas, false);
 
+// middle of all card stacks
+var middle = {x: WIDTH*4-3.5*X_CARD_DIST, y: HEIGHT/2};
 // deck image
 var Deck;
 // sprite coords for back of the card
 var Card_back = {};
-// translation coords
+// tabletop image
+var Felt;
+// tabletop pattern
+var Tabletop;
+// background position coords
+export var bg_coords = {};
+
 export var translation = {}
 // stack outline coords
 export var boxes = {};
@@ -44,31 +51,45 @@ export function setBoxes() {
     };
 }
 
-function resizeCanvas() {
+export function resizeCanvas() {
     // scale canvas and card positions according to the size of the window
-    canvas1.width = canvas2.width = window.innerWidth;
-    canvas1.height = canvas2.height = window.innerHeight;
-    translation = {
-        x: canvas2.width/2 - WIDTH*4 - 3.5*X_CARD_DIST,
-        y: canvas2.height/2 - HEIGHT/2,
-        enemyX: canvas2.width - ENEMY_SCALE*8*WIDTH - ENEMY_SCALE*8*X_CARD_DIST,
-        enemyY: (Y_CARD_DIST-HEIGHT)*ENEMY_SCALE
-    };
-    boxes.enemy = {
-        x: -translation.x + translation.enemyX - ENEMY_SCALE*2*X_CARD_DIST,
-        y: -translation.y + translation.enemyY - ENEMY_SCALE*Y_CARD_DIST/2,
-        width: ENEMY_SCALE*(7*WIDTH + 8*X_CARD_DIST),
-        height: ENEMY_SCALE*(HEIGHT + Y_CARD_DIST)
-    };
+    canvas1.width = canvas2.width = Felt.width = window.innerWidth;
+    canvas1.height = canvas2.height = Felt.height = window.innerHeight;
+    translation.x = translation.x || canvas2.width/2 - middle.x;
+    translation.y = translation.y || canvas2.height/2 - middle.y;
+    background.clearRect(0, 0, canvas1.width, canvas1.height);
+    
+    renderBackground();
     renderBoxes();
 }
 
-export function startRendering() {
+function alterHTML() {
     document.getElementById("login").style.display = "none";
+    document.body.style.background = "radial-gradient(circle at bottom, navy 0, black 100%)";
+    document.body.style.height = "100vh";
+    for (let i = 1; i < 4; i++) {
+        let temp = document.getElementsByClassName(`space stars${i}`);
+        temp[0].style.display = "block";
+    }
     canvas1.style.display = "block";
     canvas2.style.display = "block";
+}
+function setAssets() {
     Deck = getAsset('Deck_Sprite.gif');
+    Felt = getAsset('tabletop.jpg');
+    Tabletop = background.createPattern(Felt, "repeat");
+    bg_coords = {
+        x: middle.x-Felt.width*2.5,
+        y: middle.y-Felt.height*1.5,
+        width: 5*Felt.width,
+        height: 3*Felt.height
+    }
     Card_back = {x: 0, y: Deck.height*4/5};
+}
+
+export function startRendering() {
+    alterHTML();
+    setAssets();
     resizeCanvas();
     window.requestAnimationFrame(renderGame);
 }
@@ -133,7 +154,7 @@ function renderCards() {
     }
 }
 
-function renderBoxes() {
+export function renderBoxes() {
     background.save();
     background.translate(translation.x, translation.y);
     background.globalAlpha = 0.5;
@@ -145,6 +166,16 @@ function renderBoxes() {
     // enemy stacks
     background.rect(boxes.stacks.x, -boxes.stacks.y-Y_CARD_DIST, boxes.stacks.width, boxes.stacks.height);
     background.stroke();
+    background.restore();
+}
+
+function renderBackground() {
+    background.save();
+    background.translate(translation.x, translation.y);
+    //background.drawImage(Felt, 0, 0, canvas1.width, canvas1.height);
+    background.rect(bg_coords.x, bg_coords.y, bg_coords.width, bg_coords.height);
+    background.fillStyle = Tabletop;
+    background.fill();
     background.restore();
 }
 
