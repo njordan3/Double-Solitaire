@@ -44,17 +44,17 @@ io.on('connection', function(socket) {
     socket.on('mouseup', function(input) {
         if (!skip_events[socket.id]) {
             var info = JSON.parse(input);
-            game.placeCard(socket.id, info.x, info.y);
-            let update = game.placedCardsUpdate(socket.id);
+            game.decks[socket.id].placeCard(info.x, info.y, game.aces);
+            let update = game.decks[socket.id].placedCardsUpdate(socket.id, game.aces);
             sendUpdateToPlayers('placed', update);
         }
         skip_events[socket.id] = false;
     });
     socket.on('mousedown', function(input) {
         var info = JSON.parse(input);
-        if (!game.decideAction(socket.id, info.x, info.y)) {
+        if (!game.decks[socket.id].decideAction(info.x, info.y)) {
             skip_events[socket.id] = true;
-            let update = game.flippedCardsUpdate(socket.id);
+            let update = game.decks[socket.id].flippedCardsUpdate(socket.id);
             if (Object.keys(update).length != 0) {
                 sendUpdateToPlayers('flip', update);
             }
@@ -63,8 +63,8 @@ io.on('connection', function(socket) {
     socket.on('mousemove', function(input) {
         if (!skip_events[socket.id]) {
             var info = JSON.parse(input);
-            game.moveCardPos(socket.id, info.x, info.y);
-            let update = game.movingCardsUpdate(socket.id);
+            game.decks[socket.id].moveCardPos(info.x, info.y);
+            let update = game.decks[socket.id].movingCardsUpdate(socket.id);
             sendUpdateToPlayers('moving', update);
         }
     });
