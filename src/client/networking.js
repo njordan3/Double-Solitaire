@@ -14,7 +14,7 @@ export function Login(name, timeout = 10000) {
     console.log(name+" found!");
     setupCallBacks();
     return new Promise((resolve, reject) => {
-        let timer
+        let timer;
         socket.emit('login', name);
         socket.once('init', (msg) => {
             processUpdate(msg);
@@ -39,6 +39,7 @@ function setupCallBacks() {
     });
     socket.on('placed', (msg) => {
         let update = JSON.parse(msg);
+        console.log(update);
         processPlacedCards(update, socket.id);
     });
     socket.on('flip', (msg) => {
@@ -56,10 +57,8 @@ function processUpdate(msg) {
     for (let id in players) {
         if (players[id] == socket.id) {
             me = update.decks[players[id]];
-            me.name = update.players[id];
         } else {
             enemy = update.decks[players[id]];
-            enemy.name = update.players[id];
         }
     }
     aces = update.aces;
