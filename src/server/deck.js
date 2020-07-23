@@ -14,7 +14,9 @@ function generateRandomInt(min, max) {
 }
 
 module.exports = class Deck {
-    constructor() {
+    constructor(name) {
+        this.name = name;
+        this.score = 0;
         this.hand = [];
         this.stacks = [];
         this.resetDeck();
@@ -101,9 +103,7 @@ module.exports = class Deck {
         }
         // flip the top card of each stack
         for (var i = 0; i < 7; i++) {
-            //this.stacks[i].cards[this.stacks[i].top()].flipCard();
-            this.stacks[i].cards.up[0] = this.stacks[i].cards.down.pop();
-            this.stacks[i].cards.up[0].flipCard();
+            this.stacks[i].flipCard();
         }
     }
     dealThree() {
@@ -221,6 +221,7 @@ module.exports = class Deck {
                 }
                 aces[ace_index].alignCards();
                 collision = true;
+                this.score++;
             }
         }
         if (!collision) {

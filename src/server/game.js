@@ -9,21 +9,16 @@ const {WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST, STACK_HITBOX} = Constants;
 module.exports = class Game {
     constructor() {
         this.decks = {};
-        this.players = {count: 0};
         this.aces = [];
         for (var i = 0; i < 8; i++) {
             this.aces[i] = new Stack(i*(WIDTH+X_CARD_DIST), 0);
         }
     }
     addPlayer(id, name) {
-        this.decks[id] = new Deck();
-        this.players[id] = name;
-        this.players.count++;
+        this.decks[id] = new Deck(name);
     }
     removePlayer(id) {
         delete this.decks[id];
-        delete this.players[id];
-        this.players.count--;
     }
     toJSON() {
         let json = {};
@@ -39,7 +34,7 @@ module.exports = class Game {
             }
         }
         json.decks = this.decks;
-        json.players = this.players;
+        //json.players = this.players;
         return json;
     }
 }

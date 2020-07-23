@@ -24,7 +24,7 @@ http.listen(port, () => {
 io.on('connection', function(socket) {
     socket.on('login', function(input) {
         // only let 2 players join
-        if (game.players.count < 2) {
+        if (Object.keys(game.decks).length < 2) {
             console.log(input+" connected!");
             sockets[socket.id] = socket;
             game.addPlayer(socket.id, input);
@@ -37,7 +37,7 @@ io.on('connection', function(socket) {
         }
     });
     socket.on('disconnect', function() {
-        console.log(game.players[socket.id]+" disconnected");
+        console.log(game.decks[socket.id].name +" disconnected");
         delete sockets[socket.id];
         delete skip_events[socket.id];
         game.removePlayer(socket.id);
