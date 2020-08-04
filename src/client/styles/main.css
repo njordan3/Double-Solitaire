@@ -16,7 +16,6 @@ html,body {
     position: absolute;
     z-index: 2;
   }
-
   #statusButton {
     display: none;
     position: absolute;
@@ -24,15 +23,24 @@ html,body {
     bottom: 5%;
     z-index: 3;
   }
-
-  #statusMessage {
-    display: none;
+  #messageQueue {
     position: absolute;
-    right: 50%;
-    bottom: 80%;
+    text-align: center;
+    bottom: 70%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 3;
   }
-  
+  #statusMessage1 {
+    display: none;
+  }
+  #statusMessage2 {
+    display: none;
+  }
+  #statusMessage3 {
+    display: none;
+  }
+
   /* css taken from: https://codepen.io/jensaxena/pen/KQmvoK */
   .space {
     background: rgba(128, 0, 128, 0.1) center / 200px 200px round;

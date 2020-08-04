@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import {setBoxes, showStatusButton, showStatusMessage} from './render';
+import {setBoxes, showStatusButton, showStatusMessage, messageQueue} from './render';
 import {startEventListeners} from './inputs';
 
 export var enemy = {};
@@ -56,12 +56,12 @@ function setupCallBacks() {
     });
     socket.on('start_game', (msg) => {
         let message = JSON.parse(msg);
-        showStatusMessage(message);
+        messageQueue.addMessage(message, 200);
         showStatusButton("Done");
     });
     socket.on('end_game', (msg) => {
         let message = JSON.parse(msg);
-        showStatusMessage(message);
+        messageQueue.addMessage(message, 200);
         showStatusButton("Again");
     });
     socket.on('restart_game', (msg) => {
@@ -82,9 +82,8 @@ function processUpdate(msg) {
         }
     }
     aces = update.aces;
-    console.log(update);
     if (update.message != undefined) {
-        showStatusMessage(update.message);
+        messageQueue.addMessage(update.message, 200);
     }
 }
 function processMovingCards(msg, id) {

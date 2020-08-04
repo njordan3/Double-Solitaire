@@ -5,6 +5,8 @@
 import {getAsset} from './assets';
 import {me, enemy, aces, sendStatus} from './networking';
 const Constants = require('./../shared/constants');
+import {Messages} from './messages';
+export var messageQueue = new Messages();
 
 const {WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST} = Constants;
 
@@ -15,6 +17,7 @@ var background = canvas1.getContext('2d');
 var canvas2 = document.getElementById('foreground');
 var foreground = canvas2.getContext('2d');
 const statusButton = document.getElementById("statusButton");
+//const messageQueue = document.getElementById("messageQueue");
 const statusMessage = document.getElementById("statusMessage");
 
 // middle of all card stacks
@@ -87,14 +90,6 @@ export function showStatusButton(status) {
         statusButton.innerHTML = toggle ? status : `Not ${status}`;
         sendStatus(status.toLowerCase());
     }
-}
-
-export function showStatusMessage(status) {
-    statusMessage.style.display = "block";
-    statusMessage.innerHTML = status;
-    setTimeout(function () {
-        statusMessage.style.display = "none";
-    }, clearMessage);
 }
 
 function setAssets() {
