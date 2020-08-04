@@ -6,6 +6,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const bodyParser = require('body-parser');
 const Game = require('./game');
+const { send } = require('process');
 
 const port = 3000;
 var sockets = {};
@@ -23,56 +24,76 @@ http.listen(port, () => {
 
 io.on('connection', function(socket) {
     socket.on('login', function(input) {
-        // only let 2 players join
-        if (Object.keys(game.decks).length < 2) {
-            console.log(input+" connected!");
+        try {
             sockets[socket.id] = socket;
-            game.addPlayer(socket.id, input);
             skip_events[socket.id] = false;
+            game.addPlayer(socket.id, input);
             socket.emit('init', JSON.stringify(game));
             sendUpdateToPlayers('update', game);
-        }
-        else {
-            socket.emit('server_full');
+        } catch (error) {
+            console.error(error);
         }
     });
     socket.on('disconnect', function() {
-        console.log(game.decks[socket.id].name +" disconnected");
         delete sockets[socket.id];
         delete skip_events[socket.id];
         game.removePlayer(socket.id);
         sendUpdateToPlayers('update', game);
     });
-    socket.on('mouseup', function(input) {
-        if (!skip_events[socket.id]) {
-            var info = JSON.parse(input);
-            game.decks[socket.id].placeCard(info.x, info.y, game.aces);
-            let update = game.decks[socket.id].placedCardsUpdate(socket.id, game.aces);
-            sendUpdateToPlayers('placed', update);
-        }
-        skip_events[socket.id] = false;
+    socket.on('ready', function () {
+        game.toggleReady(socket.id, sendUpdateToPlayers);
+    });
+    socket.on('done', function() {
+        game.toggleDone(socket.id, sendUpdateToPlayers);
+    });
+    socket.on('again', function () {
+        game.toggleAgain(socket.id, sendUpdateToPlayers);
     });
     socket.on('mousedown', function(input) {
-        var info = JSON.parse(input);
-        if (!game.decks[socket.id].decideAction(info.x, info.y)) {
-            skip_events[socket.id] = true;
-            let update = game.decks[socket.id].flippedCardsUpdate(socket.id);
-            if (Object.keys(update).length != 0) {
-                sendUpdateToPlayers('flip', update);
+        try {
+            let coords = JSON.parse(input);
+            if (!game.mouseDown(socket.id, coords.x, coords.y)) {
+                skip_events[socket.id] = true;
+                let update = game.flippedCardsUpdate(socket.id);
+                if (Object.keys(update).length != 0) {
+                    sendUpdateToPlayers('flip', update);
+                }
             }
+        } catch (error) {
+            console.error(error);
         }
     });
     socket.on('mousemove', function(input) {
-        if (!skip_events[socket.id]) {
-            var info = JSON.parse(input);
-            game.decks[socket.id].moveCardPos(info.x, info.y);
-            let update = game.decks[socket.id].movingCardsUpdate(socket.id);
-            sendUpdateToPlayers('moving', update);
+       try {
+            if (!skip_events[socket.id]) {
+                let coords = JSON.parse(input);
+                game.mouseMove(socket.id, coords.x, coords.y);
+                let update = game.movingCardsUpdate(socket.id);
+                sendUpdateToPlayers('moving', update);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    });
+    socket.on('mouseup', function(input) {
+        try {
+            if (!skip_events[socket.id]) {
+                let coords = JSON.parse(input);
+                game.mouseUp(socket.id, coords.x, coords.y);
+                let update = game.placedCardsUpdate(socket.id);
+                sendUpdateToPlayers('placed', update);
+            }
+            skip_events[socket.id] = false;
+        } catch (error) {
+            console.error(error);
         }
     });
 });
 
-function sendUpdateToPlayers(type, update) {
+function sendUpdateToPlayers(type, update, message = undefined) {
+    // silly way to add message
+    update = JSON.parse(JSON.stringify(update));
+    update.message = message;
     for (var id in sockets) {
         sockets[id].emit(type, JSON.stringify(update));
     }

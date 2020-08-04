@@ -3,16 +3,19 @@
 // https://www.kirupa.com/html5/resizing_html_canvas_element.htm
 
 import {getAsset} from './assets';
-import {me, enemy, aces} from './networking';
+import {me, enemy, aces, sendStatus} from './networking';
 const Constants = require('./../shared/constants');
 
 const {WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST} = Constants;
+
+const clearMessage = 2000;
 
 var canvas1 = document.getElementById('background');
 var background = canvas1.getContext('2d');
 var canvas2 = document.getElementById('foreground');
 var foreground = canvas2.getContext('2d');
-window.addEventListener("resize", resizeCanvas, false);
+const statusButton = document.getElementById("statusButton");
+const statusMessage = document.getElementById("statusMessage");
 
 // middle of all card stacks
 var middle = {x: WIDTH*4-3.5*X_CARD_DIST, y: HEIGHT/2};
@@ -74,6 +77,26 @@ function alterHTML() {
     canvas1.style.display = "block";
     canvas2.style.display = "block";
 }
+
+export function showStatusButton(status) {
+    statusButton.style.display = "block";
+    let toggle = true;
+    statusButton.innerHTML = toggle ? status : `Not ${status}`;
+    statusButton.onclick = () => {
+        toggle = !toggle;
+        statusButton.innerHTML = toggle ? status : `Not ${status}`;
+        sendStatus(status.toLowerCase());
+    }
+}
+
+export function showStatusMessage(status) {
+    statusMessage.style.display = "block";
+    statusMessage.innerHTML = status;
+    setTimeout(function () {
+        statusMessage.style.display = "none";
+    }, clearMessage);
+}
+
 function setAssets() {
     Deck = getAsset('Deck_Sprite.gif');
     Felt = getAsset('tabletop.jpg');

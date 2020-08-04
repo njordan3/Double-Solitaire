@@ -16,6 +16,22 @@ html,body {
     position: absolute;
     z-index: 2;
   }
+
+  #statusButton {
+    display: none;
+    position: absolute;
+    right: 5%;
+    bottom: 5%;
+    z-index: 3;
+  }
+
+  #statusMessage {
+    display: none;
+    position: absolute;
+    right: 50%;
+    bottom: 80%;
+    z-index: 3;
+  }
   
   /* css taken from: https://codepen.io/jensaxena/pen/KQmvoK */
   .space {

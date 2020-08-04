@@ -8,6 +8,9 @@ export function startEventListeners() {
     // moving camera
     var moving = false;
     var moveStart;
+    
+    window.addEventListener("resize", resizeCanvas, false);
+
     document.addEventListener("mousemove", function(e) {
         let x = -translation.x + e.clientX;
         let y = -translation.y + e.clientY;

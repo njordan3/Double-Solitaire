@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import {setBoxes} from './render';
+import {setBoxes, showStatusButton, showStatusMessage} from './render';
 import {startEventListeners} from './inputs';
 
 export var enemy = {};
@@ -20,6 +20,7 @@ export function Login(name, timeout = 10000) {
             processUpdate(msg);
             setBoxes();
             startEventListeners();
+            showStatusButton("Ready");
             resolve('init received');
             clearTimeout(timer);
         });
@@ -27,6 +28,10 @@ export function Login(name, timeout = 10000) {
             reject(new Error("timeout waiting to login"));
         }, timeout);
     });
+}
+
+export function sendStatus(status) {
+    socket.emit(status);
 }
 
 function setupCallBacks() {
@@ -39,7 +44,6 @@ function setupCallBacks() {
     });
     socket.on('placed', (msg) => {
         let update = JSON.parse(msg);
-        console.log(update);
         processPlacedCards(update, socket.id);
     });
     socket.on('flip', (msg) => {
@@ -48,12 +52,28 @@ function setupCallBacks() {
     });
     socket.on('server_full', function() {
         console.log("server full");
+        showStatusMessage("Server Full");
+    });
+    socket.on('start_game', (msg) => {
+        let message = JSON.parse(msg);
+        showStatusMessage(message);
+        showStatusButton("Done");
+    });
+    socket.on('end_game', (msg) => {
+        let message = JSON.parse(msg);
+        showStatusMessage(message);
+        showStatusButton("Again");
+    });
+    socket.on('restart_game', (msg) => {
+        processUpdate(msg);
+        showStatusButton("Ready");
     });
 }
 
 function processUpdate(msg) {
     let update = JSON.parse(msg);
     let players = Object.keys(update.decks);
+    me = enemy = aces = {};
     for (let id in players) {
         if (players[id] == socket.id) {
             me = update.decks[players[id]];
@@ -62,6 +82,10 @@ function processUpdate(msg) {
         }
     }
     aces = update.aces;
+    console.log(update);
+    if (update.message != undefined) {
+        showStatusMessage(update.message);
+    }
 }
 function processMovingCards(msg, id) {
     if (msg.player == id) {

@@ -19,6 +19,9 @@ module.exports = class Deck {
         this.score = 0;
         this.hand = [];
         this.stacks = [];
+        this.ready = false;
+        this.done = false;
+        this.again = false;
         this.resetDeck();
         this.shuffleHand();
         this.dealCards();
@@ -32,6 +35,15 @@ module.exports = class Deck {
        this.moving_cards.cards = [];
        this.placed_cards = {};
        this.flipped_cards = {};
+    }
+    toggleReady() {
+        this.ready = !this.ready;
+    }
+    toggleDone() {
+        this.done = !this.done;
+    }
+    toggleAgain() {
+        this.again = !this.again;
     }
     toJSON() {
         var hand = [];
