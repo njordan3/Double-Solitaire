@@ -28,17 +28,19 @@ class Message {
         this.opacity = 1;
     }
     startFade(i) {
-        statusMessages[i].style.display = "block";
-        statusMessages[i].innerHTML = this.msg;
-        let that = this;
-        let t = setInterval(function () {
-            if (that.opacity > 0) {
-                that.opacity -= fadeRate;
-                statusMessages[i].style.opacity = that.opacity;
-            } else {
-                //statusMessages[i].style.display = "none";
-                clearInterval(t);
-            }
-        }, that.time);
+        if (this.opacity > 0) {
+            statusMessages[i].style.display = "block";
+            statusMessages[i].innerHTML = this.msg;
+            let that = this;
+            let t = setInterval(function () {
+                if (that.opacity > 0) {
+                    that.opacity -= fadeRate;
+                    statusMessages[i].style.opacity = that.opacity;
+                } else {
+                    this.msg = "";
+                    clearInterval(t);
+                }
+            }, that.time);
+        }
     }
 }
