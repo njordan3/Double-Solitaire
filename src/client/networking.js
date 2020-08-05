@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import {setBoxes, showStatusButton, showStatusMessage, messageQueue} from './render';
+import {setBoxes, showStatusButton, messageQueue} from './render';
 import {startEventListeners} from './inputs';
 
 export var enemy = {};
@@ -7,11 +7,11 @@ export var me = {};
 export var aces = {};
 export var cancel_events = false;
 
-var socket;
+var socket = io({transports: ['websocket'], upgrade: false});
+
 
 export function Login(name, timeout = 10000) {
-    socket = io();
-    console.log(name+" found!");
+    console.log(name+" attemping to log in!");
     setupCallBacks();
     return new Promise((resolve, reject) => {
         let timer;
@@ -23,6 +23,9 @@ export function Login(name, timeout = 10000) {
             showStatusButton("Ready");
             resolve('init received');
             clearTimeout(timer);
+        });
+        socket.once('mid_game', () => {
+            reject(new Error("there is a game in progress"));
         });
         timer = setTimeout(() => {
             reject(new Error("timeout waiting to login"));
@@ -52,7 +55,7 @@ function setupCallBacks() {
     });
     socket.on('server_full', function() {
         console.log("server full");
-        showStatusMessage("Server Full");
+        messageQueue.addMessage("Server Full", 200);
     });
     socket.on('start_game', (msg) => {
         let message = JSON.parse(msg);

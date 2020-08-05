@@ -7,17 +7,21 @@ class State {
 }
 
 class PreGamePhase extends State {
-    addPlayer(id, name) {
-        // player limit of 2
-        if (Object.keys(this.decks).length >= 2) throw "Game is full";
-        this.decks[id] = new Deck(name);
-        console.log(name + " connected");
+    constructor() {
+        super();
+        this.desc = "Pre-game";
     }
     removePlayer(id) {
         let name = this.decks[id].name;
         delete this.decks[id];
         console.log(`${name} disconnected`);
         return Object.keys(this.decks).length;
+    }
+    addPlayer(id, name) {
+        // player limit of 2
+        if (Object.keys(this.decks).length >= 2) throw "server_full";
+        this.decks[id] = new Deck(name);
+        console.log(name + " connected");
     }
     toggleReady(id) {
         this.decks[id].toggleReady();
@@ -41,11 +45,18 @@ class PreGamePhase extends State {
 }
 
 class GamePhase extends State {
+    constructor() {
+        super();
+        this.desc = "In-game";
+    }
     removePlayer(id) {
         let name = this.decks[id].name;
         delete this.decks[id];
         console.log(`${name} disconnected`);
         return Object.keys(this.decks).length;
+    }
+    addPlayer(id, name) {
+        throw 'mid_game';
     }
     mouseDown(id, x, y) {
         return this.decks[id].decideAction(x, y);
@@ -81,8 +92,18 @@ class GamePhase extends State {
 }
 
 class EndPhase extends State {
+    constructor() {
+        super();
+        this.desc = "End game";
+    }
+    addPlayer(id, name) {
+        throw 'mid_game';
+    }
     removePlayer(id) {
+        let name = this.decks[id].name;
         delete this.decks[id];
+        console.log(`${name} disconnected`);
+        return Object.keys(this.decks).length;
     }
     toggleAgain(id) {
         this.decks[id].toggleAgain();

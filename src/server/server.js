@@ -10,44 +10,54 @@ const { send } = require('process');
 
 const port = 3000;
 var sockets = {};
-var game = new Game();
+var game = new Game(sendUpdateToPlayers);
 
 var skip_events = {};
+
+const errorMsg = {
+    server_full: "Game is full",
+    mid_game: "Someone tried to join mid game"
+}
 
 // middleware
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static('dist'));
 
 http.listen(port, () => {
-  console.log('listening on port: '+port);
+    console.log(`http://localhost:${port}/`);
+    console.log('listening on port: '+port);
 });
 
 io.on('connection', function(socket) {
+    //socket emit init here?
     socket.on('login', function(input) {
         try {
+            game.addPlayer(socket.id, input);
             sockets[socket.id] = socket;
             skip_events[socket.id] = false;
-            game.addPlayer(socket.id, input);
             socket.emit('init', JSON.stringify(game));
             sendUpdateToPlayers('update', game);
         } catch (error) {
-            console.error(error);
+            console.error(errorMsg[error]);
+            socket.emit(error);
         }
     });
     socket.on('disconnect', function() {
-        delete sockets[socket.id];
-        delete skip_events[socket.id];
-        game.removePlayer(socket.id);
-        sendUpdateToPlayers('update', game);
+        if (sockets[socket.id] != undefined) {
+            game.removePlayer(socket.id);
+            delete sockets[socket.id];
+            delete skip_events[socket.id];
+            sendUpdateToPlayers('update', game);
+        }
     });
     socket.on('ready', function () {
-        game.toggleReady(socket.id, sendUpdateToPlayers);
+        game.toggleReady(socket.id);
     });
     socket.on('done', function() {
-        game.toggleDone(socket.id, sendUpdateToPlayers);
+        game.toggleDone(socket.id);
     });
     socket.on('again', function () {
-        game.toggleAgain(socket.id, sendUpdateToPlayers);
+        game.toggleAgain(socket.id);
     });
     socket.on('mousedown', function(input) {
         try {

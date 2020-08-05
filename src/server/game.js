@@ -20,56 +20,62 @@ const {WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST, STACK_HITBOX} = Constants;
 //var aces_width = WIDTH*8+X_CARD_DIST*7;
 
 module.exports = class Game {
-    constructor() {
+    constructor(sendUpdateToPlayers) {
         this.aces = [];
         this.resetAces();
         this.state = 0;
+        this.sendUpdateToPlayers = sendUpdateToPlayers;
     }
     addPlayer(id, name) {
         states[this.state].addPlayer(id, name);
     }
     removePlayer(id) {
-        if (states[this.state].removePlayer(id) == 0) {
-            console.log("No players remaining. Resetting Aces");
+        let remainingPlayers = states[this.state].removePlayer(id);
+        if (remainingPlayers == 0) {
+            console.log("No players remaining. Resetting game");
+            this.copyDeck(this.state, 0);
             this.resetAces();
-            this.state = 0;
+        } else if (remainingPlayers == 1 && this.state == 1) {
+            this.copyDeck(this.state, 2);
+            console.log("Remaining player wins by default");
+            this.sendUpdateToPlayers('end_game', "Victory by Default!");
         }
     }
-    toggleReady(id, sendUpdateToPlayers) {
+    toggleReady(id) {
         if (typeof states[this.state].toggleReady == 'function' && states[this.state].toggleReady(id)) {
             console.log(`Both players are ready to start the game. Starting game in ${readyTime/1000} seconds...`);
             let that = this;
             readyTimer = setTimeout(function() {
                 that.copyDeck(that.state, 1);
-                sendUpdateToPlayers('start_game', "Go!");
+                that.sendUpdateToPlayers('start_game', "Go!");
                 console.log("Game started");
             }, readyTime);
         } else {
             clearTimeout(readyTimer);
         }
     }
-    toggleDone(id, sendUpdateToPlayers) {
+    toggleDone(id) {
         if (typeof states[this.state].toggleDone == 'function' && states[this.state].toggleDone(id)) {
             console.log(`Both players are ready to end the game. Ending game in ${doneTime/1000} seconds...`);
             let that = this;
             doneTimer = setTimeout(function() {
                 that.copyDeck(that.state, 2);
-                sendUpdateToPlayers('end_game', "Stop!");
+                that.sendUpdateToPlayers('end_game', "Stop!");
                 console.log("Game ended");
             }, doneTime);
         } else {
             clearTimeout(doneTimer);
         }
     }
-    toggleAgain(id, sendUpdateToPlayers) {
+    toggleAgain(id) {
         if (typeof states[this.state].toggleAgain == 'function' && states[this.state].toggleAgain(id)) {
-            console.log(`Both players are ready to restart the game. Restarting game in ${againTime/1000} seconds...`);
+            console.log(`All players are ready to restart the game. Restarting game in ${againTime/1000} seconds...`);
             let that = this;
             againTimer = setTimeout(function() {
-                that.state = 0;
+                that.copyDeck(that.state, 0);
                 that.resetAces();
                 states[that.state].resetDecks();
-                sendUpdateToPlayers('restart_game', that, "Game Reset!");
+                that.sendUpdateToPlayers('restart_game', that, "Game Reset!");
                 console.log("Game restarted");
             }, againTime);
         } else {
@@ -80,7 +86,6 @@ module.exports = class Game {
         for (var i = 0; i < 8; i++) {
             this.aces[i] = new Stack(i*(WIDTH+X_CARD_DIST), 0);
         }
-        console.log("Aces reset");
     }
     mouseDown(id, x, y) {
         if (typeof states[this.state].mouseDown != 'function') throw `Gamestate ${this.state} does not have mouseDown function`;
@@ -104,8 +109,14 @@ module.exports = class Game {
         return states[this.state].placedCardsUpdate(id, this.aces);
     }
     copyDeck(src, dest) {
+        // reset status flags
+        for (let i in states[src].decks) {
+            states[src].decks[i].ready = states[src].decks[i].done = states[src].decks[i].again = false;
+        }
         this.state = dest;
+        console.log(`===============[${states[this.state].desc}]===============`);
         states[dest].decks = states[src].decks;
+        states[src].decks = {};
     }
     toJSON() {
         let json = {};
