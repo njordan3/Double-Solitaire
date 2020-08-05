@@ -4,7 +4,7 @@ const statusMessage3 = document.getElementById("statusMessage3");
 
 const statusMessages = {0: statusMessage1, 1: statusMessage2, 2: statusMessage3};
 
-const fadeRate = 0.05;
+const fadeAmt = 0.05;
 
 export class Messages {
     constructor() {
@@ -22,9 +22,10 @@ export class Messages {
 }
 
 class Message {
-    constructor(msg, time) {
+    constructor(msg, rate, hold = 2000) {
         this.msg = msg;
-        this.time = time;
+        this.hold = hold;
+        this.rate = rate;
         this.opacity = 1;
     }
     startFade(i) {
@@ -32,15 +33,19 @@ class Message {
             statusMessages[i].style.display = "block";
             statusMessages[i].innerHTML = this.msg;
             let that = this;
-            let t = setInterval(function () {
-                if (that.opacity > 0) {
-                    that.opacity -= fadeRate;
-                    statusMessages[i].style.opacity = that.opacity;
-                } else {
-                    this.msg = "";
-                    clearInterval(t);
-                }
-            }, that.time);
+            // timeout before fading
+            setTimeout(function () {
+                // interval to fade at
+                let t = setInterval(function () {
+                    if (that.opacity > 0) {
+                        that.opacity -= fadeAmt;
+                        statusMessages[i].style.opacity = that.opacity;
+                    } else {
+                        this.msg = "";
+                        clearInterval(t);
+                    }
+                }, that.rate);
+            }, that.hold);
         }
     }
 }
