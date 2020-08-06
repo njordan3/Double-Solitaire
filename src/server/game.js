@@ -60,7 +60,17 @@ module.exports = class Game {
             let that = this;
             doneTimer = setTimeout(function() {
                 that.copyDeck(that.state, 2);
-                that.sendUpdateToPlayers('end_game', "Stop!");
+                // find out who wins and prepare message
+                let id = Object.keys(states[that.state].decks);
+                let message = "";
+                if (states[that.state].decks[id[0]].score > states[that.state].decks[id[1]].score)
+                    message = `${states[that.state].decks[id[0]].score}-${states[that.state].decks[id[1]].score} ${states[that.state].decks[id[0]].name} wins!`;
+                else if (states[that.state].decks[id[1]].score > states[that.state].decks[id[0]].score) {
+                    message = `${states[that.state].decks[id[1]].score}-${states[that.state].decks[id[0]].score} ${states[that.state].decks[id[1]].name} wins!`;
+                } else {
+                    message = `${states[that.state].decks[id[0]].score}-${states[that.state].decks[id[1]].score} Tie!`
+                }
+                that.sendUpdateToPlayers('end_game', message);
                 console.log("Game ended");
             }, doneTime);
         } else {

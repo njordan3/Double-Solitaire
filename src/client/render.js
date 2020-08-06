@@ -10,8 +10,6 @@ export var messageQueue = new Messages();
 
 const {WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST} = Constants;
 
-const clearMessage = 2000;
-
 var canvas1 = document.getElementById('background');
 var background = canvas1.getContext('2d');
 var canvas2 = document.getElementById('foreground');
@@ -40,6 +38,8 @@ export function setBoxes() {
     boxes.hand = {
         x: me.hand[0].x - 2*X_CARD_DIST,
         y: me.hand[0].y - Y_CARD_DIST/2,
+        enemyX: -3*(me.hand[0].x + X_CARD_DIST),
+        enemyY: -me.hand[0].y - Y_CARD_DIST/2,
         width: 2*WIDTH + 5*X_CARD_DIST,
         height: HEIGHT + Y_CARD_DIST
     };
@@ -183,6 +183,7 @@ export function renderBoxes() {
     background.rect(boxes.stacks.x, boxes.stacks.y, boxes.stacks.width, boxes.stacks.height);
     // enemy stacks
     background.rect(boxes.stacks.x, -boxes.stacks.y-Y_CARD_DIST, boxes.stacks.width, boxes.stacks.height);
+    background.rect(boxes.hand.enemyX, boxes.hand.enemyY, boxes.hand.width, boxes.hand.height);
     background.stroke();
     background.restore();
 }
@@ -202,7 +203,7 @@ function drawCard(x, y, sx, sy, rotate = 0) {
     foreground.translate(translation.x, translation.y);
     if (rotate) {
         foreground.rotate(rotate);
-        x = -x - WIDTH - X_CARD_DIST;
+        x = -x - WIDTH;
         y = -y - HEIGHT;
     }
     foreground.drawImage(

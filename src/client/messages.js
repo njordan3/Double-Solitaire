@@ -7,12 +7,13 @@ const statusMessages = {0: statusMessage1, 1: statusMessage2, 2: statusMessage3}
 const fadeAmt = 0.05;
 
 export class Messages {
-    constructor() {
+    constructor(queueSize = 3) {
         this.messages = [];
+        this.size = queueSize;
     }
     addMessage(msg, time) {
         this.messages.unshift(new Message(msg, time));
-        if (this.messages.length > 3) {
+        if (this.messages.length > this.size) {
             this.messages.pop();
         }
         for (let i = 0; i < this.messages.length; i++) {
@@ -24,8 +25,8 @@ export class Messages {
 class Message {
     constructor(msg, rate, hold = 2000) {
         this.msg = msg;
-        this.hold = hold;
         this.rate = rate;
+        this.hold = hold;
         this.opacity = 1;
     }
     startFade(i) {
