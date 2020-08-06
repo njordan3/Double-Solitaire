@@ -10,6 +10,7 @@ const { send } = require('process');
 
 const port = 3000;
 var sockets = {};
+var names = {};
 var game = new Game(sendUpdateToPlayers);
 
 var skip_events = {};
@@ -34,9 +35,11 @@ io.on('connection', function(socket) {
         try {
             game.addPlayer(socket.id, input);
             sockets[socket.id] = socket;
+            names[socket.id] = input;
             skip_events[socket.id] = false;
             socket.emit('init', JSON.stringify(game));
             sendUpdateToPlayers('update', game);
+            sendUpdateToPlayers('new_player', names[socket.id]);
         } catch (error) {
             console.error(errorMsg[error]);
             socket.emit(error);
@@ -48,6 +51,7 @@ io.on('connection', function(socket) {
             delete sockets[socket.id];
             delete skip_events[socket.id];
             sendUpdateToPlayers('update', game);
+            sendUpdateToPlayers('player_left', names[socket.id]);
         }
     });
     socket.on('ready', function () {
