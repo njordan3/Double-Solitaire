@@ -5,8 +5,6 @@
 import {getAsset} from './assets';
 import {me, enemy, aces, sendStatus} from './networking';
 const Constants = require('./../shared/constants');
-import {Messages} from './messages';
-export var messageQueue = new Messages();
 
 const {WIDTH, HEIGHT, X_CARD_DIST, Y_CARD_DIST} = Constants;
 

@@ -1,6 +1,8 @@
 import io from 'socket.io-client';
-import {setBoxes, showStatusButton, messageQueue} from './render';
+import {setBoxes, showStatusButton} from './render';
 import {startEventListeners} from './inputs';
+import {Messages} from './messages';
+export var messageQueue = new Messages();
 
 export var enemy = {};
 export var me = {};
