@@ -6,11 +6,11 @@ const EndPhase = new States.EndPhase();
 
 var states = {0: PreGamePhase, 1: GamePhase, 2: EndPhase};
 
-const readyTime = 3000;
+const readyTime = 3;
 var readyTimer;
-const doneTime = 3000;
+const doneTime = 3;
 var doneTimer;
-const againTime = 3000;
+const againTime = 3;
 var againTimer;
 
 const Constants = require('./../shared/constants');
@@ -30,6 +30,11 @@ module.exports = class Game {
         states[this.state].addPlayer(id, name);
     }
     removePlayer(id) {
+        // stop any timer that is currently running
+        clearInterval(readyTimer);
+        clearInterval(doneTimer);
+        clearInterval(againTimer);
+
         let remainingPlayers = states[this.state].removePlayer(id);
         if (remainingPlayers == 0) {
             console.log("No players remaining. Resetting game");
@@ -43,22 +48,22 @@ module.exports = class Game {
     }
     toggleReady(id) {
         if (typeof states[this.state].toggleReady == 'function' && states[this.state].toggleReady(id)) {
-            console.log(`Both players are ready to start the game. Starting game in ${readyTime/1000} seconds...`);
+            console.log(`Both players are ready to start the game. Starting game in ${readyTime} seconds...`);
             let that = this;
-            readyTimer = setTimeout(function() {
+            readyTimer = this.countDown(readyTimer, readyTime, function () {
                 that.copyDeck(that.state, 1);
                 that.sendUpdateToPlayers('start_game', "Go!");
                 console.log("Game started");
-            }, readyTime);
+            });
         } else {
-            clearTimeout(readyTimer);
+            clearInterval(readyTimer);
         }
     }
     toggleDone(id) {
         if (typeof states[this.state].toggleDone == 'function' && states[this.state].toggleDone(id)) {
             console.log(`Both players are ready to end the game. Ending game in ${doneTime/1000} seconds...`);
             let that = this;
-            doneTimer = setTimeout(function() {
+            doneTimer = this.countDown(doneTimer, doneTime, function() {
                 that.copyDeck(that.state, 2);
                 // find out who wins and prepare message
                 let id = Object.keys(states[that.state].decks);
@@ -74,23 +79,36 @@ module.exports = class Game {
                 console.log("Game ended");
             }, doneTime);
         } else {
-            clearTimeout(doneTimer);
+            clearInterval(doneTimer);
         }
     }
     toggleAgain(id) {
         if (typeof states[this.state].toggleAgain == 'function' && states[this.state].toggleAgain(id)) {
             console.log(`All players are ready to restart the game. Restarting game in ${againTime/1000} seconds...`);
             let that = this;
-            againTimer = setTimeout(function() {
+            againTimer = this.countDown(againTimer, againTime, function() {
                 that.copyDeck(that.state, 0);
                 that.resetAces();
                 states[that.state].resetDecks();
                 that.sendUpdateToPlayers('restart_game', that, "Game Reset!");
                 console.log("Game restarted");
-            }, againTime);
+            });
         } else {
-            clearTimeout(againTimer);
+            clearInterval(againTimer);
         }
+    }
+    countDown(timer, runTime, callback) {
+        let that = this;
+        timer = setInterval(function () {
+            if (runTime <= 0) {
+                clearInterval(timer);
+                callback();
+            } else {
+                that.sendUpdateToPlayers('message', runTime);
+                runTime--;
+            }
+        }, 1000);
+        return timer;
     }
     resetAces() {
         for (var i = 0; i < 8; i++) {

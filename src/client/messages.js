@@ -35,7 +35,6 @@ class Message {
     startFade(i) {
         statusMessages[i].innerHTML = this.msg;
         statusMessages[i].style.opacity = this.opacity;
-        // timeout before fading
         if (this.timeout == undefined) {
             let that = this;
             that.timeout = setTimeout(function() {that.startInterval(i)}, that.hold);

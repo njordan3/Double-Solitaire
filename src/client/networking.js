@@ -59,6 +59,10 @@ function setupCallBacks() {
         console.log("server full");
         messageQueue.addMessage("Server Full", 200);
     });
+    socket.on('message', (msg) => {
+        let message = JSON.parse(msg);
+        messageQueue.addMessage(message, 200);
+    });
     socket.on('start_game', (msg) => {
         let message = JSON.parse(msg);
         messageQueue.addMessage(message, 200);
