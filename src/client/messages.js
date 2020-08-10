@@ -28,16 +28,20 @@ class Message {
         this.rate = rate;
         this.hold = hold;
         this.opacity = 1;
+        this.fading = false;
     }
     startFade(i) {
-        if (this.opacity > 0) {
-            statusMessages[i].style.display = "block";
-            statusMessages[i].innerHTML = this.msg;
+        statusMessages[i].style.display = "block";
+        statusMessages[i].innerHTML = this.msg;
+        statusMessages[i].style.opacity = this.opacity;
+        if (!this.fading) {
             let that = this;
             // timeout before fading
             setTimeout(function () {
                 // interval to fade at
+                that.fading = true;
                 let t = setInterval(function () {
+                    console.log(that.opacity);
                     if (that.opacity > 0) {
                         that.opacity -= fadeAmt;
                         statusMessages[i].style.opacity = that.opacity;
