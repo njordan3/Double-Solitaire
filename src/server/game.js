@@ -61,7 +61,7 @@ module.exports = class Game {
     }
     toggleDone(id) {
         if (typeof states[this.state].toggleDone == 'function' && states[this.state].toggleDone(id)) {
-            console.log(`Both players are ready to end the game. Ending game in ${doneTime/1000} seconds...`);
+            console.log(`Both players are ready to end the game. Ending game in ${doneTime} seconds...`);
             let that = this;
             doneTimer = this.countDown(doneTimer, doneTime, function() {
                 that.copyDeck(that.state, 2);
@@ -84,7 +84,7 @@ module.exports = class Game {
     }
     toggleAgain(id) {
         if (typeof states[this.state].toggleAgain == 'function' && states[this.state].toggleAgain(id)) {
-            console.log(`All players are ready to restart the game. Restarting game in ${againTime/1000} seconds...`);
+            console.log(`All players are ready to restart the game. Restarting game in ${againTime} seconds...`);
             let that = this;
             againTimer = this.countDown(againTimer, againTime, function() {
                 that.copyDeck(that.state, 0);
