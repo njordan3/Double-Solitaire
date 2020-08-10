@@ -13,10 +13,11 @@ export class Messages {
     }
     addMessage(msg, time) {
         this.messages.unshift(new Message(msg, time));
-        if (this.messages.length > this.size) {
+        while (this.messages.length > this.size) {
             this.messages.pop();
         }
         for (let i = 0; i < this.messages.length; i++) {
+            clearInterval(this.messages[i].interval);
             this.messages[i].startFade(i);
         }
     }
@@ -28,29 +29,30 @@ class Message {
         this.rate = rate;
         this.hold = hold;
         this.opacity = 1;
-        this.fading = false;
+        this.timeout = undefined;
+        this.interval = undefined;
     }
     startFade(i) {
-        statusMessages[i].style.display = "block";
         statusMessages[i].innerHTML = this.msg;
         statusMessages[i].style.opacity = this.opacity;
-        if (!this.fading) {
+        // timeout before fading
+        if (this.timeout == undefined) {
             let that = this;
-            // timeout before fading
-            setTimeout(function () {
-                // interval to fade at
-                that.fading = true;
-                let t = setInterval(function () {
-                    console.log(that.opacity);
-                    if (that.opacity > 0) {
-                        that.opacity -= fadeAmt;
-                        statusMessages[i].style.opacity = that.opacity;
-                    } else {
-                        this.msg = "";
-                        clearInterval(t);
-                    }
-                }, that.rate);
-            }, that.hold);
+            that.timeout = setTimeout(function() {that.startInterval(i)}, that.hold);
+        } else {
+            this.startInterval(i);
         }
+    }
+    startInterval(i) {
+        let that = this;
+        that.interval = setInterval(function () {
+            if (that.opacity > 0) {
+                that.opacity -= fadeAmt;
+                statusMessages[i].style.opacity = that.opacity;
+            } else {
+                that.opacity = 0;
+                clearInterval(that.interval);
+            }
+        }, that.rate);
     }
 }

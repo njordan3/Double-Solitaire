@@ -32,13 +32,13 @@ html,body {
     z-index: 3;
   }
   #statusMessage1 {
-    display: none;
+    display: block;
   }
   #statusMessage2 {
-    display: none;
+    display: block;
   }
   #statusMessage3 {
-    display: none;
+    display: block;
   }
 
   /* wont work on older browsers */
