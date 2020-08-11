@@ -71,10 +71,7 @@ function alterHTML() {
     document.getElementById("login").style.display = "none";
     document.body.style.background = "radial-gradient(circle at bottom, navy 0, black 100%)";
     document.body.style.height = "100vh";
-    for (let i = 1; i < 4; i++) {
-        let temp = document.getElementsByClassName(`space stars${i}`);
-        temp[0].style.display = "block";
-    }
+    document.getElementById("stars").style.display = "block";
     canvas1.style.display = "block";
     canvas2.style.display = "block";
 }

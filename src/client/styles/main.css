@@ -51,6 +51,10 @@ html,body {
     user-select: none;
 }
 
+  #stars {
+    display: none;
+  }
+
   /* css taken from: https://codepen.io/jensaxena/pen/KQmvoK */
   .space {
     background: rgba(128, 0, 128, 0.1) center / 200px 200px round;
@@ -66,7 +70,6 @@ html,body {
     background: radial-gradient(circle at bottom, navy 0, black 100%);
   }
   .stars1 {
-    display: none;
     animation: space 120s ease-in-out infinite;
     background-image: 
       radial-gradient(1px 1px at 25px 5px, white, rgba(255, 255, 255, 0)), 
@@ -78,7 +81,6 @@ html,body {
   }
   
   .stars2 {
-    display: none;
     animation: space 180s ease-in-out infinite;
     background-image: 
       radial-gradient(1px 1px at 75px 125px, white, rgba(255, 255, 255, 0)), 
@@ -90,7 +92,6 @@ html,body {
   }
   
   .stars3 {
-    display: none;
     animation: space 240s ease-in-out infinite;
     background-image: 
       radial-gradient(1px 1px at 10px 10px, white, rgba(255, 255, 255, 0)), 

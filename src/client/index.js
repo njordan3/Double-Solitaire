@@ -16,3 +16,15 @@ playButton.onclick = () => {
             console.log(err);
         });
 }
+
+username.addEventListener("keydown", function (e) {
+    if (e.keyCode === 13)  { // "Enter"
+        Login(username.value)
+            .then(() => {
+                startRendering();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+});
