@@ -77,14 +77,6 @@ function setupCallBacks() {
         processUpdate(msg);
         showStatusButton("Ready");
     });
-    socket.on('new_player', (msg) => {
-        let message = JSON.parse(msg);
-        messageQueue.addMessage(`${message} has joined`, 200);
-    });
-    socket.on('player_left', (msg) => {
-        let message = JSON.parse(msg);
-        messageQueue.addMessage(`${message} has left`, 200);
-    });
 }
 
 function processUpdate(msg) {

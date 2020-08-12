@@ -1,10 +1,7 @@
 const Stack = require('./stack');
 const States = require('./states');
-const PreGamePhase = new States.PreGamePhase();
-const GamePhase = new States.GamePhase();
-const EndPhase = new States.EndPhase();
 
-var states = {0: PreGamePhase, 1: GamePhase, 2: EndPhase};
+var states = {}
 
 const readyTime = 3;
 var readyTimer;
@@ -25,6 +22,7 @@ module.exports = class Game {
         this.resetAces();
         this.state = 0;
         this.sendUpdateToPlayers = sendUpdateToPlayers;
+        states = {0: new States.PreGamePhase(sendUpdateToPlayers), 1: new States.GamePhase(sendUpdateToPlayers), 2: new States.EndPhase(sendUpdateToPlayers)};
     }
     addPlayer(id, name) {
         states[this.state].addPlayer(id, name);

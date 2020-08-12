@@ -39,7 +39,6 @@ io.on('connection', function(socket) {
             skip_events[socket.id] = false;
             socket.emit('init', JSON.stringify(game));
             sendUpdateToPlayers('update', game);
-            sendUpdateToPlayers('new_player', names[socket.id]);
         } catch (error) {
             console.error(errorMsg[error]);
             socket.emit(error);
@@ -51,7 +50,6 @@ io.on('connection', function(socket) {
             delete sockets[socket.id];
             delete skip_events[socket.id];
             sendUpdateToPlayers('update', game);
-            sendUpdateToPlayers('player_left', names[socket.id]);
         }
     });
     socket.on('ready', function () {

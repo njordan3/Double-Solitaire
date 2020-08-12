@@ -7,14 +7,16 @@ class State {
 }
 
 class PreGamePhase extends State {
-    constructor() {
+    constructor(sendUpdateToPlayers) {
         super();
         this.desc = "Pre-game";
+        this.sendUpdateToPlayers = sendUpdateToPlayers;
     }
     removePlayer(id) {
         let name = this.decks[id].name;
         delete this.decks[id];
         console.log(`${name} disconnected`);
+        this.sendUpdateToPlayers('message', `${name} has left`);
         return Object.keys(this.decks).length;
     }
     addPlayer(id, name) {
@@ -22,11 +24,13 @@ class PreGamePhase extends State {
         if (Object.keys(this.decks).length >= 2) throw "server_full";
         this.decks[id] = new Deck(name);
         console.log(name + " connected");
+        this.sendUpdateToPlayers('message', `${name} has joined`);
     }
     toggleReady(id) {
         this.decks[id].toggleReady();
         let status = this.decks[id].ready ? "is" : "is not";
         console.log(`${this.decks[id].name} ${status} ready`);
+        this.sendUpdateToPlayers('message', `${this.decks[id].name} ${status} ready`);
         return this.isReady();
     }
     isReady() {
@@ -45,14 +49,16 @@ class PreGamePhase extends State {
 }
 
 class GamePhase extends State {
-    constructor() {
+    constructor(sendUpdateToPlayers) {
         super();
         this.desc = "In-game";
+        this.sendUpdateToPlayers = sendUpdateToPlayers;
     }
     removePlayer(id) {
         let name = this.decks[id].name;
         delete this.decks[id];
         console.log(`${name} disconnected`);
+        this.sendUpdateToPlayers('message', `${name} has left`);
         return Object.keys(this.decks).length;
     }
     addPlayer(id, name) {
@@ -80,6 +86,7 @@ class GamePhase extends State {
         this.decks[id].toggleDone();
         let status = this.decks[id].done ? "is" : "is not";
         console.log(`${this.decks[id].name} ${status} done`);
+        this.sendUpdateToPlayers('message', `${this.decks[id].name} ${status} done`);
         return this.isDone();
     }
     isDone() {
@@ -92,9 +99,10 @@ class GamePhase extends State {
 }
 
 class EndPhase extends State {
-    constructor() {
+    constructor(sendUpdateToPlayers) {
         super();
         this.desc = "End game";
+        this.sendUpdateToPlayers = sendUpdateToPlayers;
     }
     addPlayer(id, name) {
         throw 'mid_game';
@@ -103,12 +111,14 @@ class EndPhase extends State {
         let name = this.decks[id].name;
         delete this.decks[id];
         console.log(`${name} disconnected`);
+        this.sendUpdateToPlayers('message', `${name} has left`);
         return Object.keys(this.decks).length;
     }
     toggleAgain(id) {
         this.decks[id].toggleAgain();
-        let status = this.decks[id].again ? "does" : "does not";
-        console.log(`${this.decks[id].name} ${status} want to play again`);
+        let status = this.decks[id].again ? "is ready" : "is not";
+        console.log(`${this.decks[id].name} ${status} ready to rematch`);
+        this.sendUpdateToPlayers('message', `${this.decks[id].name} ${status} ready to rematch`);
         return this.isAgain();
     }
     isAgain() {
